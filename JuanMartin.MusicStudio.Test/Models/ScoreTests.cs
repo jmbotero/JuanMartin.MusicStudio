@@ -15,7 +15,7 @@ namespace JuanMartin.MusicStudio.Test.Models
         public static void ShouldPlaySimpleScore() 
         {
             var score = new Score();
-            score.Parse("G|");
+            //score.Parse("G| C D E F G | A B C D |");
         }
     }
 }

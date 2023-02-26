@@ -5,11 +5,11 @@ VisualStudioVersion = 17.5.33103.201
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.MusicStudio", "JuanMartin.MusicStudio.csproj", "{42C904A9-BD0B-467E-A299-81C6793096A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Kernel", "..\..\JuanMartin.Kernel\JuanMartin.Kernel\JuanMartin.Kernel.csproj", "{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JuanMartin.MusicStudio.Test", "JuanMartin.MusicStudio.Test\JuanMartin.MusicStudio.Test.csproj", "{5727359A-C855-4D0C-A27F-9B441743DD42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Models", "..\..\JuanMartin.Models\JuanMartin.Models\JuanMartin.Models.csproj", "{6B59DE41-40F5-41C0-98CD-3393D463C757}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Models", "..\JuanMartin.Models\JuanMartin.Models\JuanMartin.Models.csproj", "{6B59DE41-40F5-41C0-98CD-3393D463C757}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.MusicStudio.Test", "JuanMartin.MusicStudio.Test\JuanMartin.MusicStudio.Test.csproj", "{5727359A-C855-4D0C-A27F-9B441743DD42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Kernel", "..\JuanMartin.Kernel\JuanMartin.Kernel\JuanMartin.Kernel.csproj", "{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +21,18 @@ Global
 		{42C904A9-BD0B-467E-A299-81C6793096A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42C904A9-BD0B-467E-A299-81C6793096A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42C904A9-BD0B-467E-A299-81C6793096A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5727359A-C855-4D0C-A27F-9B441743DD42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5727359A-C855-4D0C-A27F-9B441743DD42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5727359A-C855-4D0C-A27F-9B441743DD42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5727359A-C855-4D0C-A27F-9B441743DD42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
