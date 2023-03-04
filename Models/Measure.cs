@@ -15,14 +15,11 @@ namespace JuanMartin.MusicStudio.Models
             if (measure != string.Empty) {
                 string[] notes = measure. Trim().Split(' ');
                 foreach (string n in notes) {
-                    var note = new Note(n);
-                    if (note.IsValid) {
-                        Notes.Append(note);
-                    }
+                    _ = new Note(n, this);
                 }
             }
         }
-        public IEnumerable<JuanMartin.Models.Music.IStaffPlaceHolder>  Notes { get; set; }
+        public List<IStaffPlaceHolder>  Notes { get; set; }
         public bool IsValid { get { return _isValid; } }
 
         public void Play()

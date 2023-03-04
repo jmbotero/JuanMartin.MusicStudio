@@ -8,7 +8,16 @@ using JuanMartin.Models.Music;
 namespace JuanMartin.MusicStudio.Models {
     internal class Beam :  JuanMartin.Models.Music.Beam
   {
-        public IEnumerable<Note> Notes { get; set; }
-        public void Play() { }
+        public Beam()
+        {
+            Notes= new List<Note>();
+        }
+        public List<Note> Notes { get; set; }
+        public new void Play() {
+            foreach (var note in Notes)
+            {
+                note.Play();
+            }
+        }
     }
 }

@@ -15,6 +15,12 @@ namespace JuanMartin.MusicStudio
             _player = new NFugue.Playing.Player();
         }
 
+        public void PlayScore(string sheet)
+        {
+            var score = new Models.Score(sheet);
+
+            score.Play();
+        }
         public void  PlayScale(string letterScale)
         {
             using (var player = _player)

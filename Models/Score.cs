@@ -27,7 +27,9 @@ namespace JuanMartin.MusicStudio.Models
         //        private string scorePattern = @"^(G|F|C)((1|2|3|4/4)?\|)\{?(+|-\d)?((b|bb|#|x)?\[?(\s(A|B|C|D|E|F|G|Q|H|W(\.)?\|)*\]?\}?
         private string scorePattern = @"(?<clef>G|C|F)(?<timesignature>((1|2|3|4)/4)?)(?<measures>\|.+\|)";
 
-        public IEnumerable<Measure> Measures { get; set; }
+        //     http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cmeasures%3e%5c%7c%28%28%5cs%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cQ%7cH%7cW%29%5c.%3f%29%2b%5cs%5c%7c%29%2b%29&i=G4%2f4%7c+C+D.+E+G+%7c+A+B+C+D+%7c
+
+        public List<Measure> Measures { get; set; }
 
         public Score(string sheet) {
             List<string> groups = new List<string> { "clef", "timesignature", "measures" };
@@ -49,7 +51,7 @@ namespace JuanMartin.MusicStudio.Models
                             case "timesignature":
                                 TimeSignature = value;
                                 break;
-                            case "measure":
+                            case "measures":
                                 if(value!=string.Empty) {
                                     value = value.TrimStart('|');
                                     value = value.TrimEnd('|');
@@ -58,7 +60,7 @@ namespace JuanMartin.MusicStudio.Models
                                     foreach (string s in staff) {
                                         var measure = new Measure(s);
                                         if (measure.IsValid) {
-                                            Measures.Append(measure);
+                                            Measures.Add(measure);
                                         }
                                     }
                                 }
