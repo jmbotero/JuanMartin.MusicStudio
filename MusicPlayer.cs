@@ -19,7 +19,7 @@ namespace JuanMartin.MusicStudio
         {
             var score = new Models.Score(sheet);
 
-            score.Play();
+            score.Play(_player);
         }
         public void  PlayScale(string letterScale)
         {

@@ -1,29 +1,33 @@
-﻿using System;
+﻿using JuanMartin.Models.Music;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using JuanMartin.Kernel;
-using JuanMartin.Models.Music;
-using NFugue.Theory;
+using NFugue.Playing;
 
 namespace JuanMartin.MusicStudio.Models
 {
     public class Note :   JuanMartin.Models.Music.Note
     {
-        private string notePattern = @"(?<beam_open>\[?)(?<ledger>((\+|-)\d)?)(?<accidental>(b|bb|#|x)?)(?<flag>(0|1|4|8)?)(?<symbol>(A|B|C|D|E|F|G|Q|H|W))(?<dot>\.?)(?<beam_close>\]?)";
-        
+        private const string MusicalNotationAttributeSymbol = "symbol";
+        private const string MusicalNotationAttributeBeamClose = "beam_close";
+        private const string MusicalNotationAttributeTie_SlurClose = "curve_close";
+        private const string MusicalNotationAttributeFlag = "flag";
+        private const string MusicalNotationAttributeDot = "dot";
+        private const string MusicalNotationAttributeAccidental = "accidental";
+        private const string MusicalNotationAttributeLedger = "ledger";
+        private const string MusicalNotationAttributeBeamOpen = "beam_open";
+        private const string MusicalNotationAttributeTie_SlurOpen = "curve_open";
+        private string notePattern = $@"(?<{MusicalNotationAttributeTie_SlurOpen}>\(?)(?<{MusicalNotationAttributeBeamOpen}>\[?)(?<{MusicalNotationAttributeLedger}>((\+|-)\d)?)(?<{MusicalNotationAttributeAccidental}>(b|bb|#|x)?)(?<{MusicalNotationAttributeFlag}>(0|1|4|8)?)(?<{MusicalNotationAttributeSymbol}>(A|B|C|D|E|F|G|Q|H|W))(?<{MusicalNotationAttributeDot}>\.?)(?<{MusicalNotationAttributeBeamClose}>\]?)(?<{MusicalNotationAttributeTie_SlurClose}>\)?)";
+        //  http://regexstorm.net/tester?p=%28%3f%3ccurve_open%3e%5c%28%3f%29%28%3f%3cbeam_open%3e%5c%5b%3f%29%28%3f%3cledger%3e%28%28%5c%2b%7c-%29%5cd%29%3f%29%28%3f%3caccidental%3e%28b%7cbb%7c%23%7cx%29%3f%29%28%3f%3cflag%3e%280%7c1%7c4%7c8%29%3f%29%28%3f%3csymbol%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cQ%7cH%7cW%29%29%28%3f%3cdot%3e%5c.%3f%29%28%3f%3cbeam_close%3e%5c%5d%3f%29%28%3f%3ccurve_close%3e%5c%29%3f%29&i=%28%5b%2b2%234A.%5d%29
 
-        //  http://regexstorm.net/tester?p=%28%3f%3cbeam_open%3e%5c%5b%3f%29%28%3f%3cledger%3e%28%28%5c%2b%7c-%29%5cd%29%3f%29%28%3f%3caccidental%3e%28b%7cbb%7c%23%7cx%29%3f%29%28%3f%3cflag%3e%280%7c1%7c4%7c8%29%3f%29%28%3f%3csymbol%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cQ%7cH%7cW%29%29%28%3f%3cdot%3e%5c.%3f%29%28%3f%3cbeam_close%3e%5c%5d%3f%29&i=%5b%2b2%234A.%5d
-
-        private readonly NFugue.Playing.Player _player;
         private Regex _regex = null; 
         private bool _isValid = true;
         private bool _inBeam = false;
+        private bool _inCurve = false;
 
         public Note(string note, Measure currentMeasure) {
-            List<string> groups = new List<string> { "ledger", "accidental", "flag","symbol", "dot" };
+            List<string> groups = new List<string> { MusicalNotationAttributeLedger, MusicalNotationAttributeAccidental, MusicalNotationAttributeFlag, MusicalNotationAttributeSymbol, MusicalNotationAttributeDot };
             Beam beam = null;
 
             _regex = new Regex(notePattern, RegexOptions.Compiled);
@@ -42,7 +46,13 @@ namespace JuanMartin.MusicStudio.Models
                         Console.WriteLine($"{name}:{value}");
                         switch (name)
                         {
-                            case "beam_open":
+                            case MusicalNotationAttributeTie_SlurOpen:
+                                if (value != string.Empty)
+                                {
+                                    _inCurve = true;
+                                }
+                                break;
+                            case MusicalNotationAttributeBeamOpen:
                                 if (value != string.Empty)
                                 {
                                     _inBeam = true;
@@ -50,10 +60,10 @@ namespace JuanMartin.MusicStudio.Models
                                     beam = new Beam();
                                 }
                                 break;
-                            case "ledger":
+                            case MusicalNotationAttributeLedger:
                                 base.LgderCount = (value == string.Empty) ? 0 : int.Parse(value);
                                 break;
-                            case "accidental":
+                            case MusicalNotationAttributeAccidental:
                                 if (value != string.Empty)
                                 {
                                     switch (value)
@@ -76,20 +86,20 @@ namespace JuanMartin.MusicStudio.Models
                                     }
                                 }
                                 break;
-                            case "dot":
-                                IsDotted = (value != string.Empty) ? true : false;
-                                if (_inBeam)
+                            case MusicalNotationAttributeDot:
+                                IsDotted = (value != string.Empty);
+                                if (value != string.Empty)
                                 {
                                     AddNote(currentMeasure, beam);
                                 }
                                 break;
-                            case "flag":
+                            case MusicalNotationAttributeFlag:
                                 if (value != string.Empty)
                                     Type = (pitchType)Enum.Parse(typeof(pitchType), value);
                                 else
                                     Type = pitchType.quarter;
                                 break;
-                            case "symbol":
+                            case MusicalNotationAttributeSymbol:
                                 if (value == string.Empty)
                                 {
                                     _isValid = false;
@@ -97,17 +107,24 @@ namespace JuanMartin.MusicStudio.Models
                                 else
                                 {
                                     Name = value;
-                                    if(!HasAttribute("dot"))
+                                    if(!HasAttribute(MusicalNotationAttributeDot, note))
                                     {
                                         AddNote(currentMeasure, beam);
                                     }
                                 }
                                 break;
-                            case "beam_close":
+                            case MusicalNotationAttributeBeamClose:
                                 if (value != string.Empty && _inBeam)
                                 {
                                     currentMeasure.Notes.Add(beam);
                                     _inBeam = false;
+                                    BeamSet = beam;
+                                }
+                                break;
+                            case MusicalNotationAttributeTie_SlurClose:
+                                if (value != string.Empty)
+                                {
+                                    _inCurve = false;
                                 }
                                 break;
                         }
@@ -131,21 +148,29 @@ namespace JuanMartin.MusicStudio.Models
             }
         }
 
-        public bool HasAttribute(string name)
+        public bool HasAttribute(string name, string expression)
         {
-            var groups = _regex.GetGroupNames();
+            var matches = _regex.Matches(expression);
+            if (matches == null) return false;
 
-            if (groups == null) return false;
+            foreach (Match m in matches)
+            {
+                foreach (Group group in m.Groups)
+                {
+                    
+                    if (group.Value != string.Empty && group.Name == name) 
+                    {
+                        return true;
+                    }
+                }
+            }
 
-             return groups.Contains(name);
+            return false;
         }
         public  bool IsValid { get { return _isValid; } }
-        public new void Play()
+        public new void Play(Player player)
         {
-            using (var player = _player)
-            {
-                player.Play(base.Name.ToString());
-            }
+            player.Play(Name.ToString());
         }
     }
 }
