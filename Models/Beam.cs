@@ -7,18 +7,28 @@ using JuanMartin.Models.Music;
 using NFugue.Playing;
 
 namespace JuanMartin.MusicStudio.Models {
-    internal class Beam :  JuanMartin.Models.Music.Beam
+    public class Beam :  JuanMartin.Models.Music.Beam
   {
-        public Beam()
-        {
-            Notes= new List<Note>();
-        }
-        public List<Note> Notes { get; set; }
-        public new void Play(Player player) {
+        public void Play(Player player) {
             foreach (var note in Notes)
             {
-                note.Play(player);
+                ((Note)note).Play(player);
             }
+
+            Console.Write($" {this}");
+        }
+
+        public override string ToString()
+        {
+            StringBuilder beam = new StringBuilder();
+            beam.Append("[");
+            foreach (var note in Notes)
+            {
+                beam.Append(" ");
+                beam.Append(note.ToString());
+            }
+            beam.Append(" ]");
+            return beam.ToString();
         }
     }
 }

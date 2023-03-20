@@ -13,7 +13,7 @@ namespace JuanMartin.MusicStudio.Models
         private const string MusicalNotationAttributeClef = "clef";
         private const string MusicalNotationAttribsuteTimesignature = "timesignature";
         private const string MusicalNotationAttributeMeasures = "measures";
-
+        private const string MusicalNotationAttributeFirstMeasureConfig = "first_measure_config";
         //^(G|F|C)                                      clef
         //(1|2|3|4/4)?                               time signature
         //\|                                                measure open
@@ -29,42 +29,50 @@ namespace JuanMartin.MusicStudio.Models
         //\}?                                            tie close
 
         //        private string scorePattern = @"^(G|F|C)((1|2|3|4/4)?\|)\{?(+|-\d)?((b|bb|#|x)?\[?(\s(A|B|C|D|E|F|G|Q|H|W(\.)?\|)*\]?\}?
-        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>G|C|F)(?<{MusicalNotationAttribsuteTimesignature}>((1|2|3|4)/4)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
+        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>G|C|F)(?<{MusicalNotationAttribsuteTimesignature}>((1|2|3|4)/4)?)(?<{MusicalNotationAttributeFirstMeasureConfig}>(_(\d|\w)+)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
 
-        //     http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cmeasures%3e%5c%7c%28%28%5cs%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cQ%7cH%7cW%29%5c.%3f%29%2b%5cs%5c%7c%29%2b%29&i=G4%2f4%7c+C+D.+E+G+%7c+A+B+C+D+%7c
+        //     http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cfirst_measure_config%3e%28%28%5cd%7c%5cw%29%2b%29%3f%29%28%3f%3cmeasures%3e%5c%7c.%2b%5c%7c%29&i=G4%2f4f2%7c+C+D.+E+G+p1%7c+A+B+C+D+%7c
 
         public List<Measure> Measures { get; set; }
 
-        public Score(string sheet) {
-            List<string> groups = new List<string> { MusicalNotationAttributeClef, MusicalNotationAttribsuteTimesignature, MusicalNotationAttributeMeasures };
+        public Score(string name, string sheet) {
+            string measureConfig = "", nextConfig;
+            List<string> groups = new List<string> { MusicalNotationAttributeClef, MusicalNotationAttribsuteTimesignature, MusicalNotationAttributeFirstMeasureConfig , MusicalNotationAttributeMeasures };
+
+            Name = name;
+            Measures = new List<Measure>();
+
             Regex regex = new Regex(scorePattern, RegexOptions.Compiled);
 
             if (regex.IsMatch(sheet)) {
                 var ms = regex.Matches(sheet);
                 
-                Measures = new List<Measure>();
 
                 foreach (Match m in ms) {
-                    foreach (var name in groups) {
-                        var group = m.Groups[name];
+                    foreach (var group_name in groups) {
+                        var group = m.Groups[group_name];
 
                         var value = group.Success ? group.Value : string.Empty;
-                        Console.WriteLine($"{name}:{value}");
-                        switch (name) {
+                        Console.WriteLine($"{group_name}:{value}");
+                        switch (group_name) {
                             case MusicalNotationAttributeClef:
                                 Clef = value;
                                 break;
                             case MusicalNotationAttribsuteTimesignature:
                                 TimeSignature = value;
                                 break;
+                            case MusicalNotationAttributeFirstMeasureConfig:
+                                measureConfig = value.TrimStart('_');
+                                break;
                             case MusicalNotationAttributeMeasures:
                                 if(value!=string.Empty) {
                                     value = value.TrimStart('|');
                                     value = value.TrimEnd('|');
-
+                                    
                                     string[] staff = value.Split('|');
                                     foreach (string s in staff) {
-                                        var measure = new Measure(s);
+                                        var measure = new Measure(FormatMeasureStaff(measureConfig, s, out nextConfig));
+                                        measureConfig = nextConfig;
                                         if (measure.IsValid) {
                                             Measures.Add(measure);
                                         }
@@ -76,8 +84,18 @@ namespace JuanMartin.MusicStudio.Models
                 }
             }
         }
+
+        private string FormatMeasureStaff(string measureConfig, string measure, out string nextConfig)
+        {
+            int index = measure.LastIndexOf(" ");
+            string notes=measure.Substring(0, index);
+            nextConfig = measure.Substring(index+1);
+            return $"{measureConfig}| {notes} |";
+        }
+
         public void Play(Player player)
         {
+            Console.WriteLine($"Playing {Name}: ");
             foreach (var measure in Measures)
             {
                 measure.Play(player);
