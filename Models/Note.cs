@@ -57,7 +57,6 @@ namespace JuanMartin.MusicStudio.Models
                                 if (value != string.Empty)
                                 {
                                     _startBeam = true;
-                                    currentMeasure.AddBeam();
                                 }
                                 break;
                             case MusicalNotationAttributeLedger:
