@@ -7,12 +7,12 @@ using JuanMartin.Models.Music;
 using NFugue.Playing;
 
 namespace JuanMartin.MusicStudio.Models {
-    public class Beam :  JuanMartin.Models.Music.Beam
+    public class MusicBeam :  JuanMartin.Models.Music.Beam
   {
         public void Play(Player player) {
             foreach (var note in Notes)
             {
-                ((Note)note).Play(player);
+                ((MusicNote)note).Play(player);
             }
 
             Console.Write($" {this}");

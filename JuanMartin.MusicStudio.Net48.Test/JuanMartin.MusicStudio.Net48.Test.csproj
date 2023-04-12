@@ -37,6 +37,10 @@
     <Compile Include="Models\MusicScoreTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\JuanMartin.Models\JuanMartin.Models\JuanMartin.Models.csproj">
+      <Project>{6b59de41-40f5-41c0-98cd-3393d463c757}</Project>
+      <Name>JuanMartin.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JuanMartin.MusicStudio.csproj">
       <Project>{42c904a9-bd0b-467e-a299-81c6793096a1}</Project>
       <Name>JuanMartin.MusicStudio</Name>

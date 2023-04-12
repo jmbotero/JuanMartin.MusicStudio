@@ -17,7 +17,7 @@ namespace JuanMartin.MusicStudio
 
         public void PlayScore(string name, string sheet)
         {
-            var score = new Models.Score(name,sheet);
+            var score = new Models.MusicScore(name,sheet);
 
             score.Play(_player);
         }

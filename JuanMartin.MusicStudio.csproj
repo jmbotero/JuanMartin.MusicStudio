@@ -58,10 +58,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Beam.cs" />
-    <Compile Include="Models\Measure.cs" />
-    <Compile Include="Models\Note.cs" />
-    <Compile Include="Models\Score.cs" />
+    <Compile Include="Models\MusicBeam.cs" />
+    <Compile Include="Models\MusicMeasure.cs" />
+    <Compile Include="Models\MusicNote.cs" />
+    <Compile Include="Models\MusicScore.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
