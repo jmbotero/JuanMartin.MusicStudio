@@ -11,7 +11,8 @@ namespace JuanMartin.MusicStudio.Models
     public class MusicScore : JuanMartin.Models.Music.Score
     {
         private const string MusicalNotationAttributeClef = "clef";
-        private const string MusicalNotationAttribsuteTimesignature = "timesignature";
+        private const string MusicalNotationAttributeTempo = "tempo";
+        private const string MusicalNotationAttributeTimesignature = "timesignature";
         private const string MusicalNotationAttributeMeasures = "measures";
         private const string MusicalNotationAttributeFirstMeasureConfig = "first_measure_config";
         //^(G|F|C)                                      clef
@@ -29,15 +30,15 @@ namespace JuanMartin.MusicStudio.Models
         //\}?                                            tie close
 
         //        private string scorePattern = @"^(G|F|C)((1|2|3|4/4)?\|)\{?(+|-\d)?((b|bb|#|x)?\[?(\s(A|B|C|D|E|F|G|Q|H|W(\.)?\|)*\]?\}?
-        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>G|C|F)(?<{MusicalNotationAttribsuteTimesignature}>((1|2|3|4)/4)?)(?<{MusicalNotationAttributeFirstMeasureConfig}>(_(\d|\w)+)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
+        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>G|C|F)(?<{MusicalNotationAttributeTempo}>(T\d+)?)(?<{MusicalNotationAttributeTimesignature}>(\d/\d)?)(?<{MusicalNotationAttributeFirstMeasureConfig}>(_(.)+)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
 
-        //     http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cfirst_measure_config%3e%28%28%5cd%7c%5cw%29%2b%29%3f%29%28%3f%3cmeasures%3e%5c%7c.%2b%5c%7c%29&i=G4%2f4f2%7c+C+D.+E+G+p1%7c+A+B+C+D+%7c
+        //    http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctempo%3e%28T%5cd%2b%29%3f%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cfirst_measure_config%3e%28_%28.%29%2b%29%3f%29%28%3f%3cmeasures%3e%5c%7c.%2b%5c%7c%29&i=GT1004%2f4_f2%5bflute%5d%7c+C+D.+E+G+p1%5bviolin%5d%7c+A+B+C+D+%7c 
 
         public List<MusicMeasure> Measures { get; set; }
 
         public MusicScore(string name, string sheet) {
             string measureConfig = "", nextConfig;
-            List<string> groups = new List<string> { MusicalNotationAttributeClef, MusicalNotationAttribsuteTimesignature, MusicalNotationAttributeFirstMeasureConfig , MusicalNotationAttributeMeasures };
+            List<string> groups = new List<string> { MusicalNotationAttributeClef, MusicalNotationAttributeTempo , MusicalNotationAttributeTimesignature, MusicalNotationAttributeFirstMeasureConfig , MusicalNotationAttributeMeasures };
 
             Name = name;
             Measures = new List<MusicMeasure>();
@@ -58,7 +59,14 @@ namespace JuanMartin.MusicStudio.Models
                             case MusicalNotationAttributeClef:
                                 Clef = value;
                                 break;
-                            case MusicalNotationAttribsuteTimesignature:
+                            case MusicalNotationAttributeTempo:
+                                if (value != string.Empty)
+                                {
+                                    value = value.TrimStart('T');
+                                    Tempo = int.Parse(value);
+                                }
+                                break;
+                            case MusicalNotationAttributeTimesignature:
                                 TimeSignature = value;
                                 break;
                             case MusicalNotationAttributeFirstMeasureConfig:

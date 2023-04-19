@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\MusicBeam.cs" />
+    <Compile Include="Models\MusicChord.cs" />
     <Compile Include="Models\MusicMeasure.cs" />
     <Compile Include="Models\MusicNote.cs" />
     <Compile Include="Models\MusicScore.cs" />

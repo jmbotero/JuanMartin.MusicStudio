@@ -14,11 +14,13 @@ namespace JuanMartin.MusicStudio.Models
 {
     public class MusicMeasure : JuanMartin.Models.Music.Measure
     {
+        private const string MusicalNotationAttributeInstrument = "instrument";
         private const string MusicalNotationAttributeDynamics = "dynamics";
         private const string MusicalNotationAttributeVolume = "volume";
         private const string MusicalNotationAttributeNotes = "notes";
-        private readonly string measurePattern = $@"(?<dynamics>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<volume>(1|2|3)?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
-        // http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3e%281%7c2%7c3%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
+        private readonly string measurePattern = $@"(?<dynamics>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<volume>(1|2|3)?)(?<{MusicalNotationAttributeInstrument}>(\[\w+\])?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
+        // http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3e%281%7c2%7c3%29%3f%29%28%3f%3cinstrument%3e%28%5c%5b%5cw%2b%5c%5d%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2%5bviolin%5d%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
+
         private bool _isValid = false;
         public MusicMeasure(string measure, out JuanMartin.Models.Music.Note extendedNote,  List<JuanMartin.Models.Music.Note> extendedCurve = null) {
             Notes = new List<IStaffPlaceHolder>();
@@ -31,7 +33,7 @@ namespace JuanMartin.MusicStudio.Models
             if (measure != string.Empty)
             {
 
-                List<string> groups = new List<string> { MusicalNotationAttributeDynamics, MusicalNotationAttributeVolume, MusicalNotationAttributeNotes };
+                List<string> groups = new List<string> { MusicalNotationAttributeDynamics, MusicalNotationAttributeVolume, MusicalNotationAttributeInstrument , MusicalNotationAttributeNotes };
 
                 Regex regex = new Regex(measurePattern, RegexOptions.Compiled);
 
@@ -67,6 +69,12 @@ namespace JuanMartin.MusicStudio.Models
                                     }
                                     else
                                         base.Volume = VolumeLoudness.none;
+                                    break;
+                                case MusicalNotationAttributeInstrument:
+                                    if (value != string.Empty)
+                                    {
+                                        Instrument = value;
+                                    }
                                     break;
                                 case MusicalNotationAttributeNotes:
                                     if (value != string.Empty)
