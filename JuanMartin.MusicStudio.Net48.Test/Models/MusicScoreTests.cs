@@ -127,5 +127,17 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             }
         }
 
+        [Test]
+        public static void ShouldCreateAChordFromQualitySyntax()
+        {
+            var score = new MusicScore("Chord1", "G4/4| C3maj7 D |");
+
+        }
+        [Test]
+        public static void ShouldCreateAChordFromStaccatoSyntax()
+        {
+            var score = new MusicScore("Chord1", "G4/4| C3q+E3bq+G3#q D |");
+
+        }
     }
 }

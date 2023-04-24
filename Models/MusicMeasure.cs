@@ -91,16 +91,26 @@ namespace JuanMartin.MusicStudio.Models
                                         foreach (var (item, index) in notes.Enumerate())
                                         {
                                             string n = item;// (addTieToMeasure) ? "(" : "" + item;
-                                            var note = new MusicNote(n, this, activeBeam, activeCurve);
-                                            activeCurve = note.InCurve;
-                                            if (note.LastInCurve)
-                                                activeCurve = false;
-                                            activeBeam = note.InBeam && !note.LastInBeam; // if note is last in beam  going forward there is no more active beam
-                                            bool extendTie = (index == notes.Length - 1 && note.InCurve);
-                                            extendedCurveNote = null;
-                                            if (extendTie)
+                                            var cType = MusicChord.IsValidChord(n);
+                                            if ( cType != ChordType.none)
                                             {
-                                                extendedCurveNote = note;
+                                                var chord=new MusicChord(cType, n, this);
+
+                                                this.Notes.Add(chord);
+                                            }
+                                            else
+                                            {
+                                                var note = new MusicNote(n, this, activeBeam, activeCurve);
+                                                activeCurve = note.InCurve;
+                                                if (note.LastInCurve)
+                                                    activeCurve = false;
+                                                activeBeam = note.InBeam && !note.LastInBeam; // if note is last in beam  going forward there is no more active beam
+                                                bool extendTie = (index == notes.Length - 1 && note.InCurve);
+                                                extendedCurveNote = null;
+                                                if (extendTie)
+                                                {
+                                                    extendedCurveNote = note;
+                                                }
                                             }
                                         }
 
@@ -137,6 +147,8 @@ namespace JuanMartin.MusicStudio.Models
                     ((MusicNote)note).Play(player);
                 else if (note is Beam)
                     ((MusicBeam)note).Play(player);
+                else if ( note is JuanMartin.Models.Music.Chord) 
+                    ((MusicChord)note).Play(player);
             }
         }
     }
