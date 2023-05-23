@@ -7,13 +7,12 @@ using JuanMartin.Models.Music;
 using NFugue.Playing;
 
 namespace JuanMartin.MusicStudio.Models {
-    public class MusicBeam :  JuanMartin.Models.Music.Beam
-  {
-        public void Play(Player player) {
-            foreach (var note in Notes)
-            {
-                ((MusicNote)note).Play(player);
-            }
+    public class MusicBeam : Beam
+    {
+        public void Play(Player player) 
+        {
+            string staccato = SetStaccato();
+            player.Play(staccato);
 
             Console.Write($" {this}");
         }

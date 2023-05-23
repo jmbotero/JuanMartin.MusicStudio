@@ -36,6 +36,11 @@ namespace JuanMartin.MusicStudio.Models
 
         public List<MusicMeasure> Measures { get; set; }
 
+        /// <summary>
+        /// Music theory   https://www.musicnotes.com/blog/how-to-read-sheet-music/
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="sheet"></param>
         public MusicScore(string name, string sheet) {
             string measureConfig = "", nextConfig;
             List<string> groups = new List<string> { MusicalNotationAttributeClef, MusicalNotationAttributeTempo , MusicalNotationAttributeTimesignature, MusicalNotationAttributeFirstMeasureConfig , MusicalNotationAttributeMeasures };
