@@ -21,8 +21,8 @@ namespace JuanMartin.MusicStudio.Models
         private const string MusicalNotationAttributeLedger = "ledger";
         private const string MusicalNotationAttributeBeamOpen = "beam_open";
         private const string MusicalNotationAttributeCurveOpen = "curve_open";
-        private string notePattern = $@"(?<{MusicalNotationAttributeCurveOpen}>\(?)(?<{MusicalNotationAttributeBeamOpen}>\[?)(?<{MusicalNotationAttributeLedger}>((\+|-)\d)?)(?<{MusicalNotationAttributeSymbol}>(A|B|C|D|E|F|G|Q|H|W))(?<{MusicalNotationAttributeDot}>\.?)(?<{MusicalNotationAttributeAccidental}>(b|bb|#|##)?)(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeDuration}>(w|h|q|i|s|t|x|o)?)(?<{MusicalNotationAttributeBeamClose}>\]?)(?<{MusicalNotationAttributeCurveClose}>\)?)";
-        //http://regexstorm.net/tester?p=%28%3f%3ccurve_open%3e%5c%28%3f%29%28%3f%3cbeam_open%3e%5c%5b%3f%29%28%3f%3cledger%3e%28%28%5c%2b%7c-%29%5cd%29%3f%29%28%3f%3csymbol%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cQ%7cH%7cW%29%29%28%3f%3cdot%3e%5c.%3f%29%28%3f%3caccidental%3e%28b%7cbb%7c%23%7c%23%23%29%3f%29%28%3f%3coctave%3e%5cd%3f%29%28%3f%3cduration%3e%28w%7ch%7cq%7ci%7cs%7ct%7cx%7co%29%3f%29%28%3f%3cbeam_close%3e%5c%5d%3f%29%28%3f%3ccurve_close%3e%5c%29%3f%29&i=%28%5b%2b2A.%233q%5d%29
+        private string notePattern = $@"(?<{MusicalNotationAttributeCurveOpen}>\(?)(?<{MusicalNotationAttributeBeamOpen}>\[?)(?<{MusicalNotationAttributeLedger}>((\+|-)\d)?)(?<{MusicalNotationAttributeSymbol}>(A|B|C|D|E|F|G|R))(?<{MusicalNotationAttributeDot}>\.?)(?<{MusicalNotationAttributeAccidental}>(b|bb|#|##)?)(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeDuration}>(w|h|q|i|s|t|x|o)?)(?<{MusicalNotationAttributeBeamClose}>\]?)(?<{MusicalNotationAttributeCurveClose}>\)?)";
+        //http://regexstorm.net/tester?p=%28%3f%3ccurve_open%3e%5c%28%3f%29%28%3f%3cbeam_open%3e%5c%5b%3f%29%28%3f%3cledger%3e%28%28%5c%2b%7c-%29%5cd%29%3f%29%28%3f%3csymbol%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cR%29%29%28%3f%3cdot%3e%5c.%3f%29%28%3f%3caccidental%3e%28b%7cbb%7c%23%7c%23%23%29%3f%29%28%3f%3coctave%3e%5cd%3f%29%28%3f%3cduration%3e%28w%7ch%7cq%7ci%7cs%7ct%7cx%7co%29%3f%29%28%3f%3cbeam_close%3e%5c%5d%3f%29%28%3f%3ccurve_close%3e%5c%29%3f%29&i=%28%5b%2b2A.%233q%5d%29
 
         private readonly Regex _regex = null; 
         private readonly bool _isValid = true;
@@ -66,13 +66,13 @@ namespace JuanMartin.MusicStudio.Models
                                 }
                                 break;
                             case MusicalNotationAttributeLedger:
-                                base.LgderCount = (value == string.Empty) ? 0 : int.Parse(value);
+                                base.LedgerCount = (value == string.Empty) ? 0 : int.Parse(value);
                                 break;
                             case MusicalNotationAttributeAccidental:
-                                HasAccidental = AccidentalType.none;
+                                Accidental = AccidentalType.none;
                                 if (value != string.Empty)
                                 {
-                                    HasAccidental = (AccidentalType)EnumExtensions.GetValueFromDescription<AccidentalType>(value);
+                                    Accidental = (AccidentalType)EnumExtensions.GetValueFromDescription<AccidentalType>(value);
                                 }
                                 break;
                             case MusicalNotationAttributeDot:
@@ -103,20 +103,8 @@ namespace JuanMartin.MusicStudio.Models
                                 else
                                 {
                                     Name = value;
-                                    if ("QWH".Contains(value))
+                                    if (value == "R")
                                     { 
-                                        switch(value)
-                                        {
-                                            case "H":
-                                                Type = PitchType.half;
-                                                break;
-                                            case "W":
-                                                Type = PitchType.whole;
-                                                break;
-                                            default:
-                                                Type = PitchType.quarter;
-                                                break;
-                                        }
                                         IsRest = true;
                                     }
 
@@ -173,8 +161,13 @@ namespace JuanMartin.MusicStudio.Models
                     }
                 }
             }
+            else
+            {
+                throw new ArgumentException($"Error parsing note: {note}.");
+            }
+
         }
-        
+
         /// <summary>
         /// Set curve types of all notes, there must be more than 1,
         ///  in cuve to tie or slur.

@@ -12,15 +12,14 @@ namespace JuanMartin.MusicStudio.Models
     public class MusicChord : JuanMartin.Models.Music.Chord
     {
         private const string MusicalNotationAttributeNote = "note";
-        private const string MusicalNotationAttributeDuration = "duration";
+        private const string MusicalNotationAttributeNotes = "notes";
         private const string MusicalNotationAttributeQuality = "quality";
         private const string MusicalNotationAttributeOctave = "octave";
-        private const string MusicalNotationAttributeAccidental = "accidental";
         private const string MusicalNotationAttributeInversions = "inversions";
         private static string qualityChordPattern = $@"(?<{MusicalNotationAttributeNote}>(A|B|C|D|E|F|G))(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeQuality}>\w\w\w\d?)(?<{MusicalNotationAttributeInversions}>((\^)+)?)";
         //http://regexstorm.net/tester?p=%28%3f%3cnote%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%29%29%28%3f%3coctave%3e%5cd%3f%29%28%3f%3cquality%3e%5cw%5cw%5cw%5cd%3f%29%28%3f%3cinversions%3e%28%28%5c%5e%29%2b%29%3f%29&i=C3maj7%5e%5e
-        private static string staccatoChordPattern = $@"((?<{MusicalNotationAttributeNote}>:(A|B|C|D|E|F|G))(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeAccidental}>(b|#)?)(?<{MusicalNotationAttributeDuration}>\w)\+?)+";
-        //http://regexstorm.net/tester?p=%28%28%3f%3cnote%3e%3a%28A%7cB%7cC%7cD%7cE%7cF%7cG%29%29%28%3f%3coctave%3e%5cd%3f%29%28%3f%3caccidental%3e%28b%7c%23%29%3f%29%28%3f%3cduration%3e%5cw%29%5c%2b%3f%29%2b&i=%3aC3q%2b%3aE3bq%2b%3aG3%23q
+        private static string staccatoChordPattern = $@"(?<{MusicalNotationAttributeNotes}>:(.)+)";
+        //http://regexstorm.net/tester?p=%28%3f%3cnotes%3e%3a%28.%29%2b%29&i=%3a%2b2C%233q%3aE3q%3aG%233q
 
         public MusicChord(ChordType chordType, string chord, MusicMeasure currentMeasure)
         {
@@ -83,15 +82,17 @@ namespace JuanMartin.MusicStudio.Models
                         Console.WriteLine($"chord:{chord}");
                         if (chord != null)
                         {
-                            string[] notes = chord.Split('+');
+                            chord = chord.TrimStart(':');
+                            string[] notes = chord.Split(':');
                             foreach (var (note, index) in notes.Enumerate())
                             {
-                                MusicNote chordNote = new MusicNote(note.TrimStart(':'), currentMeasure, false, false, false);
+                                MusicNote chordNote = new MusicNote(note, currentMeasure, false, false, false);
                                 if (index == 0)
                                     Root = chordNote;
                                 else
                                 {
-                                    AddChordNoteToList(chordNote);
+                                    // add note to chord
+                                    Notes.Add(chordNote);
                                 }
                                 Quality = QualityType.fixed_notes;
                             }
@@ -120,15 +121,16 @@ namespace JuanMartin.MusicStudio.Models
                 List<string> n = new List<string>();
                 foreach (var chordNote in chordNotes)
                 {
-                    string a = (chordNote.HasAccidental != AccidentalType.none) ? EnumExtensions.GetDescription(chordNote.HasAccidental) : "";
+                    string a = (chordNote.Accidental != AccidentalType.none) ? EnumExtensions.GetDescription(chordNote.Accidental) : "";
                     string o = (chordNote.Octave != rootOctave) ? chordNote.Octave.ToString() : "";
                     n.Add($"{chordNote.Name}{a}{o}");
                 }
                 return n.ToArray();
             }
 
-            List<JuanMartin.Models.Music.Note> notes = GetListOfChordNotes();
-            
+            List<JuanMartin.Models.Music.Note> notes = Notes;
+
+
             if (notes.Count != 0)
             {
                 return ConvertToNoteNameArray(notes);
@@ -148,11 +150,24 @@ namespace JuanMartin.MusicStudio.Models
                 string n = baseNotes[index].TrimStart('[');
                 note = new MusicNote(n, null, false, false, false);
                 //if (intervalAccident == "") 
-                    string scaleAccident = (n.Length == 2) ? n[1].ToString() : "";
+               string scaleAccident = (n.Length >= 2) ? n.Substring(1) : "";
 
+                // address special chord accident scenarios
                 string accident;
                 // if chord scale specifies accidenal  as none or  different to  chord then set note accidenttal to none
-                if (scaleAccident == EnumExtensions.GetDescription(AccidentalType.none))
+                if (intervalAccident == "" && scaleAccident == EnumExtensions.GetDescription(AccidentalType.sharp))
+                    accident = EnumExtensions.GetDescription(AccidentalType.sharp);
+                else if (intervalAccident == EnumExtensions.GetDescription(AccidentalType.sharp) && scaleAccident == EnumExtensions.GetDescription(AccidentalType.none))
+                    accident = intervalAccident;
+                else if (intervalAccident == EnumExtensions.GetDescription(AccidentalType.flat) && scaleAccident == EnumExtensions.GetDescription(AccidentalType.sharp))
+                    accident = "";
+                else if (intervalAccident == "" && scaleAccident == "*")
+                    accident = EnumExtensions.GetDescription(AccidentalType.sharp);
+                else if (intervalAccident == EnumExtensions.GetDescription(AccidentalType.flat) && scaleAccident == "*")
+                    accident = "";
+                else if (intervalAccident == EnumExtensions.GetDescription(AccidentalType.flat) && scaleAccident == EnumExtensions.GetDescription(AccidentalType.none))
+                    accident = "";
+                else if (scaleAccident == EnumExtensions.GetDescription(AccidentalType.none))
                     accident = "";
                 else if (intervalAccident == EnumExtensions.GetDescription(AccidentalType.sharp) && scaleAccident == EnumExtensions.GetDescription(AccidentalType.sharp))
                     accident = EnumExtensions.GetDescription(AccidentalType.doubleSharp);
@@ -166,7 +181,11 @@ namespace JuanMartin.MusicStudio.Models
                     accident = intervalAccident;
 
 
-                note.HasAccidental = (accident != "") ? EnumExtensions.GetValueFromDescription<AccidentalType>(accident) : AccidentalType.none;
+                //clean up special character used in scale intervals
+                if (!"b bb # x n -".Contains(accident)) accident = "";
+
+                accident = accident.Trim();
+                note.Accidental = (accident != "") ? EnumExtensions.GetValueFromDescription<AccidentalType>(accident) : AccidentalType.none;
 
                 note.Octave = rootOctave;
 
@@ -175,10 +194,11 @@ namespace JuanMartin.MusicStudio.Models
             if (firstAccident != "")
             {
                 foreach (var  anote in notes)
-                    anote.HasAccidental = (intervalAccident != "") ? EnumExtensions.GetValueFromDescription<AccidentalType>(intervalAccident) : AccidentalType.none;
+                    anote.Accidental = (intervalAccident != "") ? EnumExtensions.GetValueFromDescription<AccidentalType>(intervalAccident) : AccidentalType.none;
             }
 
-            SetChordNotes(notes);
+            // set chord notes
+            Notes = notes;
 
             return ConvertToNoteNameArray(notes);
         }
@@ -191,7 +211,7 @@ namespace JuanMartin.MusicStudio.Models
         List<JuanMartin.Models.Music.Note> GetInversionNotes()
         {
             GetNotes();
-            List<JuanMartin.Models.Music.Note> notes = GetListOfChordNotes();
+            List<JuanMartin.Models.Music.Note> notes = Notes;
             List<int> order;
             int size = GetIntervals().Length;
             

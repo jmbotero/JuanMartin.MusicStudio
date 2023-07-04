@@ -1,11 +1,10 @@
-﻿using NUnit.Framework;
-using JuanMartin.MusicStudio.Models;
-using System.Linq;
+﻿using JuanMartin.Kernel.Extesions;
 using JuanMartin.Models.Music;
-using System.Dynamic;
+using JuanMartin.MusicStudio.Models;
+using NUnit.Framework;
 using System;
-using JuanMartin.Kernel.Extesions;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace JuanMartin.MusicStudio.Net48.Test.Models
 {
@@ -129,364 +128,501 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
                 }
             }
         }
+        [Test]
+        public static void ShouldParseNoteConfigueation()
+        {
+            var score = new MusicScore("Note1", "G7/4| A -2B C. D# E3 Fh Ri |");
+
+            List<IStaffPlaceHolder> notes = score.Measures.First().Notes;
+            string expectedNotePosition = "First";
+            Note actualNote = (Note)notes[0];
+            string expectedName = "A";
+            int expectedLedgerCount = 0;
+            bool expectedIsDotted = false;
+            AccidentalType expectedAccidental = AccidentalType.none;
+            int expectedOctave = 5;
+            PitchType expectedType = PitchType.quarter;
+            bool expectedIsRest = false;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedLedgerCount, actualNote.LedgerCount, $"{expectedNotePosition} note {nameof(actualNote.LedgerCount)} '{actualNote.LedgerCount}' is not correct.");
+            Assert.AreEqual(expectedIsDotted, actualNote.IsDotted, $"{expectedNotePosition} note {nameof(actualNote.IsDotted)} '{actualNote.IsDotted}' is not correct.");
+            Assert.AreEqual(expectedAccidental, actualNote.Accidental, $"{expectedNotePosition} note {nameof(actualNote.Accidental)} '{actualNote.Accidental}' is not correct.");
+            Assert.AreEqual(expectedOctave, actualNote.Octave, $"{expectedNotePosition} note {nameof(actualNote.Octave)} '{actualNote.Octave}' is not correct.");
+            Assert.AreEqual(expectedType, actualNote.Type, $"{expectedNotePosition} note {nameof(actualNote.Type)} '{actualNote.Type}' is not correct.");
+            Assert.AreEqual(expectedIsRest, actualNote.IsRest, $"{expectedNotePosition} note {nameof(actualNote.IsRest)}  ' {actualNote.IsRest}' is not correct.");
+
+            expectedNotePosition = "Second";
+            actualNote = (Note)notes[1];
+            expectedName = "B";
+            expectedLedgerCount = -2;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedLedgerCount, actualNote.LedgerCount, $"{expectedNotePosition} note {nameof(actualNote.LedgerCount)} '{actualNote.LedgerCount}' is not correct.");
+
+            expectedNotePosition = "Third";
+            actualNote = (Note)notes[2];
+            expectedName = "C";
+            expectedIsDotted = true;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedIsDotted, actualNote.IsDotted, $"{expectedNotePosition} note {nameof(actualNote.IsDotted)} '{actualNote.IsDotted}' is not correct.");
+
+            expectedNotePosition = "Fourth";
+            actualNote = (Note)notes[3];
+            expectedName = "D";
+            expectedAccidental = AccidentalType.sharp;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedAccidental, actualNote.Accidental, $"{expectedNotePosition} note {nameof(actualNote.Accidental)} '{actualNote.Accidental}' is not correct.");
+
+            expectedNotePosition = "Sixth";
+            actualNote = (Note)notes[5];
+            expectedName = "F";
+            expectedType = PitchType.half;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedType, actualNote.Type, $"{expectedNotePosition} note {nameof(actualNote.Type)} '{actualNote.Type}' is not correct.");
+
+            expectedNotePosition = "Seventh";
+            expectedName = "R";
+            actualNote = (Note)notes[6];
+            expectedType = PitchType.eigth;
+            expectedIsRest = true;
+
+            Assert.AreEqual(expectedName, actualNote.Name, $"{expectedNotePosition} note {nameof(actualNote.Name)} '{actualNote.Name}' is not correct.");
+            Assert.AreEqual(expectedType, actualNote.Type, $"{expectedNotePosition} note {nameof(actualNote.Type)} '{actualNote.Type}' is not correct.");
+            Assert.AreEqual(expectedIsRest, actualNote.IsRest, $"{expectedNotePosition} note {nameof(actualNote.IsRest)}  ' {actualNote.IsRest}' is not correct.");
+        }
+
+        [Test]
+        public static void ShouldParseMeasureConfigueation()
+        {
+            DynamicsType expectedDynamics = DynamicsType.mezzo_piano;
+            VolumeLoudness expectedVolume = VolumeLoudness.decrescendo;
+            int expectedVoice = 0;
+            string expectedInstrument = "violin";
+
+            var score = new MusicScore("Measure1", "G4/4||mp2V0[violin]|A B C D ||f1V1[flute]| G B A D ||V2[piano]| D. C A |");
+
+            Measure measure = (Measure)score.Measures.First();
+
+            Assert.AreEqual(expectedDynamics, measure.Dynamics, $"Measure Dynamics {measure.Dynamics} is not correct.");
+            Assert.AreEqual(expectedVolume, measure.Volume, $"Measure Volume {measure.Volume} is not correct.");
+            Assert.AreEqual(expectedVoice, measure.Voice, $"Measure Voice {measure.Voice} is not correct.");
+            Assert.AreEqual(expectedInstrument, measure.Instrument, $"Measure Instrument {measure.Instrument} is not correct.");
+
+            // second  measure
+            measure = score.Measures[1];
+
+            expectedDynamics = DynamicsType.forte;
+            expectedVolume = VolumeLoudness.crescendo;
+            expectedVoice = 1;
+            expectedInstrument = "flute";
+
+            Assert.AreEqual(expectedDynamics, measure.Dynamics, $"Second  measure Dynamics {measure.Dynamics} is not correct.");
+            Assert.AreEqual(expectedVolume, measure.Volume, $"Second  measure Volum/e {measure.Volume} is not correct.");
+            Assert.AreEqual(expectedVoice, measure.Voice, $"Second  measure Voice {measure.Voice} is not correct.");
+            Assert.AreEqual(expectedInstrument, measure.Instrument, $"Second  measure Instrument {measure.Instrument} is not correct.");
+
+            // third  measure
+            measure = score.Measures[2];
+
+            expectedDynamics = DynamicsType.neutral;
+            expectedVolume = VolumeLoudness.none;
+            expectedVoice = 2;
+            expectedInstrument = "piano";
+
+            Assert.AreEqual(expectedDynamics, measure.Dynamics, $"Third  measure Dynamics {measure.Dynamics} is not correct.");
+            Assert.AreEqual(expectedVolume, measure.Volume, $"Third  measure Volum/e {measure.Volume} is not correct.");
+            Assert.AreEqual(expectedVoice, measure.Voice, $"Third  measure Voice {measure.Voice} is not correct.");
+            Assert.AreEqual(expectedInstrument, measure.Instrument, $"Third  measure Instrument {measure.Instrument} is not correct.");
+        }
+        [Test]
+        public static void ShouldParseScoreConfigueation()
+        {
+            string expectedClef = "G";
+            string expectedTimeSignature = "4/4";
+            int expectedTempo = 100;
+            int expectedMeasureCount = 2;
+
+            var score = new MusicScore("Score1", "GT1004/4||f2[flute]| C D. E G ||p1[violin]| A B C D |");
+
+            Assert.AreEqual(expectedClef, score.Clef, $"Score Clef {score.Clef} is not correct.");
+            Assert.AreEqual(expectedTimeSignature, score.TimeSignature, $"Score TimeSignature {score.TimeSignature} is not correct.");
+            Assert.AreEqual(expectedTempo, score.Tempo, $"Score Tempo {score.Tempo} is not correct.");
+            Assert.AreEqual(expectedMeasureCount, score.Measures.Count, $"Score measure count {score.Measures.Count} is not correct.");
+        }
 
         [Test]
         public static void ShouldCreateAChordFromQualitySyntax()
         {
             var score = new MusicScore("Chord1", "G4/4| C3maj7 D |");
             Chord chord = (Chord)score.Measures.First().Notes[0];
+            string expectedRootName = "C";
 
             Assert.IsTrue(chord is Chord);
             Assert.AreEqual(QualityType.major_seventh, chord.Quality, "quality is  mayor 7th");
-            Assert.AreEqual("C", chord.Root.Name, "it is a C chord");
+            Assert.AreEqual(expectedRootName, chord.Root.Name, "it is a C chord");
         }
 
         [Test]
         public static void ShouldCreateAChordFromStaccatoSyntax()
         {
-            var score = new MusicScore("Chord1", "G4/4| :C3q+:E3bq+:G3#q D |");
+            var score = new MusicScore("Chord1", "G4/4| :C3q:E3q:G#3q D |");
             Chord chord = (Chord)score.Measures.First().Notes[0];
+            string expectedRootName = "C";
 
             Assert.IsTrue(chord is Chord);
             Assert.AreEqual(QualityType.fixed_notes, chord.Quality, "quality is manual chord");
-            Assert.AreEqual("C", chord.Root.Name, "it is a C chord");
+            Assert.AreEqual(expectedRootName, chord.Root.Name, "it is a C chord");
         }
 
         [Test]
         public static void ShouldGetNotesByChordInterval()
         {
-            string actualChordRootName = "D";
+            string[] notes = new string[] { "A", "B", "C", "D", "E", "F", "G" };
             int actualChordRootOctave = 3;
-            foreach (QualityType quality in Enum.GetValues(typeof(QualityType)))
+            foreach (var actualChordRootName in notes)
             {
-                string description = EnumExtensions.GetDescription(quality);
-                MusicChord chord = new MusicChord(ChordType.quality_based, $"{actualChordRootName}{actualChordRootOctave}{description}", null);
-                string[] expectedNotes = null;
+                foreach (QualityType quality in Enum.GetValues(typeof(QualityType)))
+                {
+                    string description = EnumExtensions.GetDescription(quality);
+                    MusicChord chord = new MusicChord(ChordType.quality_based, $"{actualChordRootName}{actualChordRootOctave}{description}", null);
+                    string[] expectedNotes = null;
 
-                switch (quality)
-                {
-                    case QualityType.major:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                expectedNotes = new string[] { "A", "C#", "E" };
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D#", "F#" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "E", "G" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F#", "A" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "F#", "G#" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "A", "C" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "A", "B" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.minor:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                expectedNotes = new string[] { "A", "C", "E" };
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D", "F#" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "Eb", "G" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F", "A" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G", "B" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "Ab", "C" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "Bb", "D" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.major_seventh:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                expectedNotes = new string[] { "A", "C#", "E","G#" };
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D#", "F#", "A#" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "E", "G", "B" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F#", "A", "C#" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G#", "B", "D#" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "A", "C", "E" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "B", "D", "F#" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.minor_seventh:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                expectedNotes = new string[] { "A", "C", "E", "G" };
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D", "F#", "A" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "Eb", "G", "Bb" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F", "A", "C" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G", "B", "D" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "Ab", "C", "Eb" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "Bb", "D", "F" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.diminished:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D", "F" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "Eb", "Gb" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F", "A" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G", "Bb" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "E", "Ab", "Cb" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "B", "D" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.augmented:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D#", "Fx" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "E", "G#" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F#", "A#" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G#", "B#" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "A", "C!#" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "B", "D#" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.diminished_seventh:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D", "F", "Ab" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "Eb", "Gb", "A" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F", "A", "C" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G", "B", "D" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "Ab", "C", "Eb" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "Bb", "Db", "Fb" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.augmented_seventh:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D#", "Fx", "A" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "E", "G#", "Bb" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D","F#", "A#", "C" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G#", "B#", "D" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "A", "C#", "Eb" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "B", "D#", "F" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.dominant_seventh:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "D#", "F#", "A" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "E", "G", "Bb" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "F#", "A", "C" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "G#", "B", "D" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "A", "C", "Eb" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "B", "D", "F" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.suspended_two:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "C#", "F#" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "D", "G" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "E", "A" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "F#", "B" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "G", "C" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "A", "D" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    case QualityType.suspended_four:
-                        switch (actualChordRootName)
-                        {
-                            case "A":
-                                break;
-                            case "B":
-                                expectedNotes = new string[] { "B", "E", "F#" };
-                                break;
-                            case "C":
-                                expectedNotes = new string[] { "C", "F", "G" };
-                                break;
-                            case "D":
-                                expectedNotes = new string[] { "D", "G", "A" };
-                                break;
-                            case "E":
-                                expectedNotes = new string[] { "E", "A", "B" };
-                                break;
-                            case "F":
-                                expectedNotes = new string[] { "F", "Bb", "C" };
-                                break;
-                            case "G":
-                                expectedNotes = new string[] { "G", "C", "D" };
-                                break;
-                            default:
-                                Assert.Fail("No root note specified.");
-                                break;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                if (expectedNotes != null)
-                {
-                    string[] intervals = chord.GetIntervals();
-                    string[] actualNotes = chord.GetNotes(actualChordRootName,actualChordRootOctave, intervals, chord.ChordNotesScale);
-                    Assert.AreEqual(expectedNotes, actualNotes, $"{actualChordRootName} {description.Capitalize()} chord has incorret notes: ({string.Join(",", actualNotes)}).");
+                    switch (quality)
+                    {
+                        case QualityType.major:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C#", "E" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D#", "F#" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "E", "G" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F#", "A" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G#", "B" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "A", "C" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "B", "D" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.minor:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C", "E" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D", "F#" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "Eb", "G" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F", "A" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G", "B" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "Ab", "C" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "Bb", "D" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.major_seventh:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C#", "E", "G#" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D#", "F#", "A#" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "E", "G", "B" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F#", "A", "C#" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G#", "B", "D#" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "A", "C", "E" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "B", "D", "F#" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.minor_seventh:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C", "E", "G" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D", "F#", "A" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "Eb", "G", "Bb" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F", "A", "C" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G", "B", "D" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "Ab", "C", "Eb" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "Bb", "D", "F" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.diminished:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C", "Eb" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D", "F" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "Eb", "Gb" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F", "A" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G", "Bb" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "Ab", "Cb" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "Bb", "Db" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.augmented:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C#", "E#" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D#", "Fx" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "E", "G#" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F#", "A#" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G#", "B#" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "A", "C#" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "B", "D#" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.diminished_seventh:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C", "Eb", "Gb" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D", "F", "Ab" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "Eb", "Gb", "A" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F", "A", "C" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G", "Bb", "Db" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "Ab", "Cb", "Ebb" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "Bb", "Db", "Fb" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.augmented_seventh:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C#", "E#", "G" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D#", "Fx", "A" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "E", "G#", "Bb" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F#", "A#", "C" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G#", "B#", "D" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "A", "C#", "Eb" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "B", "D#", "F" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.dominant_seventh:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "C#", "E", "G" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "D#", "F#", "A" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "E", "G", "Bb" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "F#", "A", "C" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "G#", "B", "D" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "A", "C", "Eb" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "B", "D", "F" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.suspended_two:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "B", "E" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "C#", "F#" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "D", "G" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "E", "A" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "F#", "B" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "G", "C" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "A", "D" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        case QualityType.suspended_four:
+                            switch (actualChordRootName)
+                            {
+                                case "A":
+                                    expectedNotes = new string[] { "A", "D","E" };
+                                    break;
+                                case "B":
+                                    expectedNotes = new string[] { "B", "E", "F#" };
+                                    break;
+                                case "C":
+                                    expectedNotes = new string[] { "C", "F", "G" };
+                                    break;
+                                case "D":
+                                    expectedNotes = new string[] { "D", "G", "A" };
+                                    break;
+                                case "E":
+                                    expectedNotes = new string[] { "E", "A", "B" };
+                                    break;
+                                case "F":
+                                    expectedNotes = new string[] { "F", "Bb", "C" };
+                                    break;
+                                case "G":
+                                    expectedNotes = new string[] { "G", "C", "D" };
+                                    break;
+                                default:
+                                    Assert.Fail($"No root note specified for {description.Capitalize()} chord.");
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    if (expectedNotes != null)
+                    {
+                        string[] intervals = chord.GetIntervals();
+                        string[] actualNotes = chord.GetNotes(actualChordRootName, actualChordRootOctave, intervals, chord.ChordNotesScale);
+                        Assert.AreEqual(expectedNotes, actualNotes, $"{actualChordRootName} {description.Capitalize()} chord has incorret notes: ({string.Join(",", actualNotes)}).");
+                    }
                 }
             }
-        }
+         }
     }
 }

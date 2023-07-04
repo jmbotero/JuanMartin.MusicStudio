@@ -12,14 +12,15 @@ using Sanford.Multimedia;
 
 namespace JuanMartin.MusicStudio.Models
 {
-    public class MusicMeasure : JuanMartin.Models.Music.Measure
+    public class MusicMeasure : Measure
     {
+        private const string MusicalNotationAttributeVoice = "voice";
         private const string MusicalNotationAttributeInstrument = "instrument";
         private const string MusicalNotationAttributeDynamics = "dynamics";
         private const string MusicalNotationAttributeVolume = "volume";
         private const string MusicalNotationAttributeNotes = "notes";
-        private readonly string measurePattern = $@"(?<dynamics>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<volume>(1|2|3)?)(?<{MusicalNotationAttributeInstrument}>(\[\w+\])?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
-        // http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3e%281%7c2%7c3%29%3f%29%28%3f%3cinstrument%3e%28%5c%5b%5cw%2b%5c%5d%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2%5bviolin%5d%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
+        private readonly string measurePattern = $@"(?<{MusicalNotationAttributeDynamics}>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<{MusicalNotationAttributeVolume}>(1|2|3)?)(?<{MusicalNotationAttributeVoice}>(V\d)?)(?<{MusicalNotationAttributeInstrument}>(\[\w+\])?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
+        //http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3e%281%7c2%7c3%29%3f%29%28%3f%3cvoice%3e%28V%5cd%29%3f%29%28%3f%3cinstrument%3e%28%5c%5b%5cw%2b%5c%5d%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2V0%5bviolin%5d%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
 
         private bool _isValid = false;
         public MusicMeasure(string measure, out JuanMartin.Models.Music.Note extendedNote,  List<JuanMartin.Models.Music.Note> extendedCurve = null) {
@@ -33,10 +34,11 @@ namespace JuanMartin.MusicStudio.Models
             if (measure != string.Empty)
             {
 
-                List<string> groups = new List<string> { MusicalNotationAttributeDynamics, MusicalNotationAttributeVolume, MusicalNotationAttributeInstrument , MusicalNotationAttributeNotes };
+                List<string> groups = new List<string> { MusicalNotationAttributeDynamics, MusicalNotationAttributeVolume, MusicalNotationAttributeVoice ,MusicalNotationAttributeInstrument , MusicalNotationAttributeNotes };
 
                 Regex regex = new Regex(measurePattern, RegexOptions.Compiled);
 
+                
                 if (regex.IsMatch(measure))
                 {
                     var ms = regex.Matches(measure);
@@ -62,7 +64,7 @@ namespace JuanMartin.MusicStudio.Models
                                     else
                                         base.Dynamics = DynamicsType.neutral;
                                     break;
-                                case MusicalNotationAttributeVolume:
+                                    case MusicalNotationAttributeVolume:
                                     if (value != string.Empty)
                                     {
                                         base.Volume = (VolumeLoudness)Enum.Parse(typeof(VolumeLoudness), value);
@@ -70,10 +72,20 @@ namespace JuanMartin.MusicStudio.Models
                                     else
                                         base.Volume = VolumeLoudness.none;
                                     break;
+                                case MusicalNotationAttributeVoice:
+                                    if (value != string.Empty)
+                                    {
+                                        string v = value.TrimStart('V');
+                                        Voice = int.Parse(v);
+                                    }
+                                    break;
                                 case MusicalNotationAttributeInstrument:
                                     if (value != string.Empty)
                                     {
-                                        Instrument = value;
+                                        var i = value.TrimStart('[');
+                                        i = i.TrimEnd(']');
+
+                                        Instrument = i;
                                     }
                                     break;
                                 case MusicalNotationAttributeNotes:
@@ -121,10 +133,13 @@ namespace JuanMartin.MusicStudio.Models
                         }
                     }
                 }
+                else 
+                { 
+                    throw new ArgumentException($"Error parsing measure: {measure}.");
+                }
             }
         }
 
-        public List<IStaffPlaceHolder> Notes { get; set; }
         public bool IsValid { get { return _isValid; } }
         public Beam GetBeam()
         {
@@ -141,15 +156,10 @@ namespace JuanMartin.MusicStudio.Models
 
         public void Play(Player player)
         {
-            foreach (var note in Notes)
-            {
-                if (note is JuanMartin.Models.Music.Note)
-                    ((MusicNote)note).Play(player);
-                else if (note is Beam)
-                    ((MusicBeam)note).Play(player);
-                else if ( note is JuanMartin.Models.Music.Chord) 
-                    ((MusicChord)note).Play(player);
-            }
+            string staccato = SetStaccato();
+            player.Play(staccato);
+
+            Console.Write($" {this}");
         }
     }
 }
