@@ -19,21 +19,22 @@ namespace JuanMartin.MusicStudio.Models
         private const string MusicalNotationAttributeDynamics = "dynamics";
         private const string MusicalNotationAttributeVolume = "volume";
         private const string MusicalNotationAttributeNotes = "notes";
-        private readonly string measurePattern = $@"(?<{MusicalNotationAttributeDynamics}>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<{MusicalNotationAttributeVolume}>(1|2|3)?)(?<{MusicalNotationAttributeVoice}>(V\d)?)(?<{MusicalNotationAttributeInstrument}>(\[\w+\])?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
-        //http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3e%281%7c2%7c3%29%3f%29%28%3f%3cvoice%3e%28V%5cd%29%3f%29%28%3f%3cinstrument%3e%28%5c%5b%5cw%2b%5c%5d%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2V0%5bviolin%5d%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
+        private readonly string measurePattern = $@"(?<{MusicalNotationAttributeDynamics}>(fff|ff|f|mf|mp|p|pp|ppp)?)(?<{MusicalNotationAttributeVolume}>(VOL(1|2|3))?)(?<{MusicalNotationAttributeVoice}>(V\d)?)(?<{MusicalNotationAttributeInstrument}>(\[\w+\])?)(?<{MusicalNotationAttributeNotes}>\|.+\|)";
+        //http://regexstorm.net/tester?p=%28%3f%3cdynamics%3e%28fff%7cff%7cf%7cmf%7cmp%7cp%7cpp%7cppp%29%3f%29%28%3f%3cvolume%3ec%29%28%3f%3cvoice%3e%28V%5cd%29%3f%29%28%3f%3cinstrument%3e%28%5c%5b%5cw%2b%5c%5d%29%3f%29%28%3f%3cnotes%3e%5c%7c.%2b%5c%7c%29&i=f2V0%5bviolin%5d%7c+%28%5b%23A.+A.%5d+B+C+D%29+%7c
 
         private bool _isValid = false;
-        public MusicMeasure(string measure, out JuanMartin.Models.Music.Note extendedNote,  List<JuanMartin.Models.Music.Note> extendedCurve = null) {
+        public MusicMeasure(string measure, Score currentScore, out JuanMartin.Models.Music.Note extendedNote,  List<JuanMartin.Models.Music.Note> extendedCurve = null) {
             Notes = new List<IStaffPlaceHolder>();
 
             bool addTieToMeasure = false; //  if a tie starts with measures last note then restart it in next
             _isValid = true;
             extendedNote = null;
+
+            Score = currentScore;
             if (extendedCurve != null && extendedCurve.Count > 0) addTieToMeasure = true;
 
             if (measure != string.Empty)
             {
-
                 List<string> groups = new List<string> { MusicalNotationAttributeDynamics, MusicalNotationAttributeVolume, MusicalNotationAttributeVoice ,MusicalNotationAttributeInstrument , MusicalNotationAttributeNotes };
 
                 Regex regex = new Regex(measurePattern, RegexOptions.Compiled);
@@ -44,12 +45,13 @@ namespace JuanMartin.MusicStudio.Models
                     var ms = regex.Matches(measure);
                     bool activeCurve = false;
                     bool activeBeam = false;
+                    string noteDynamics = "";
                     JuanMartin.Models.Music.Note extendedCurveNote = null;
 
                     foreach (Match m in ms)
                     {
                         foreach (var name in groups)
-                        {
+                         {
                             var group = m.Groups[name];
 
                             var value = group.Success ? group.Value : string.Empty;
@@ -63,10 +65,12 @@ namespace JuanMartin.MusicStudio.Models
                                     }
                                     else
                                         base.Dynamics = DynamicsType.neutral;
+                                    
                                     break;
-                                    case MusicalNotationAttributeVolume:
-                                    if (value != string.Empty)
+                                case MusicalNotationAttributeVolume:
+                                   if (value != string.Empty)
                                     {
+                                        value = value.Replace("VOL", "");
                                         base.Volume = (VolumeLoudness)Enum.Parse(typeof(VolumeLoudness), value);
                                     }
                                     else
@@ -97,9 +101,9 @@ namespace JuanMartin.MusicStudio.Models
                                             activeCurve = true;
                                         }
 
-                                        value = value.TrimStart('|');
-                                        value = value.TrimEnd('|');
-                                        string[] notes  = value.Trim().Split(' ');
+                                        value = value.TrimStart(Measure.MeasureDelimiter);
+                                        value = value.TrimEnd(Measure.MeasureDelimiter);
+                                        string[] notes  = value.Trim().Split(new char[] { ' ' },StringSplitOptions.RemoveEmptyEntries);
                                         foreach (var (item, index) in notes.Enumerate())
                                         {
                                             string n = item;// (addTieToMeasure) ? "(" : "" + item;
@@ -112,7 +116,7 @@ namespace JuanMartin.MusicStudio.Models
                                             }
                                             else
                                             {
-                                                var note = new MusicNote(n, this, activeBeam, activeCurve);
+                                                var note = new MusicNote(n, this, activeBeam, activeCurve, measureDeinedNoteDynammmmics: noteDynamics);
                                                 activeCurve = note.InCurve;
                                                 if (note.LastInCurve)
                                                     activeCurve = false;

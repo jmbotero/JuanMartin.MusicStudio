@@ -29,9 +29,12 @@ namespace JuanMartin.MusicStudio.Models
         private bool? _startCurve = null;
         private bool? _startBeam = null;
 
-        public MusicNote(string note, MusicMeasure currentMeasure, bool activeBeam, bool activeCurve, bool addNewNoteToCurrentMeasure = true) {
+        public MusicNote(string note, MusicMeasure currentMeasure, bool activeBeam, bool activeCurve, bool addNewNoteToCurrentMeasure = true, string measureDeinedNoteDynammmmics = "") 
+        {
             List<string> groups = new List<string> { MusicalNotationAttributeCurveOpen, MusicalNotationAttributeBeamOpen,MusicalNotationAttributeLedger, MusicalNotationAttributeAccidental, MusicalNotationAttributeDuration, MusicalNotationAttributeSymbol, MusicalNotationAttributeDot , MusicalNotationAttributeOctave , MusicalNotationAttributeBeamClose,MusicalNotationAttributeCurveClose};
 
+            Measure = currentMeasure;
+       
             _regex = new Regex(notePattern, RegexOptions.Compiled);
 
             
@@ -50,6 +53,7 @@ namespace JuanMartin.MusicStudio.Models
                         switch (name)
                         {
                             case MusicalNotationAttributeCurveOpen:
+                                IsDotted = (value != string.Empty);
                                 if (value != string.Empty)
                                 {
                                     _startCurve = true;
@@ -69,14 +73,13 @@ namespace JuanMartin.MusicStudio.Models
                                 base.LedgerCount = (value == string.Empty) ? 0 : int.Parse(value);
                                 break;
                             case MusicalNotationAttributeAccidental:
-                                Accidental = AccidentalType.none;
+                                Accidental = AccidentalType.natural;
                                 if (value != string.Empty)
                                 {
                                     Accidental = (AccidentalType)EnumExtensions.GetValueFromDescription<AccidentalType>(value);
                                 }
                                 break;
                             case MusicalNotationAttributeDot:
-                                IsDotted = (value != string.Empty);
                                 if (value != string.Empty && !hasNoteBeenAdded  && !InBeam && addNewNoteToCurrentMeasure)
                                 {
                                     AddNote(InBeam || (activeBeam || _startBeam == true), this, currentMeasure);
@@ -94,6 +97,10 @@ namespace JuanMartin.MusicStudio.Models
                                 {
                                     Octave = int.Parse(value);
                                 }
+                                else if (Measure != null && Measure.Score != null && Measure.Score.Clef == CllefType.treble)
+                                    Octave = 5;
+                                else if (Measure != null && Measure.Score != null && Measure.Score.Clef == CllefType.bass)
+                                    Octave = 4;
                                 break;
                             case MusicalNotationAttributeSymbol:
                                 if (value == string.Empty)
@@ -163,7 +170,7 @@ namespace JuanMartin.MusicStudio.Models
             }
             else
             {
-                throw new ArgumentException($"Error parsing note: {note}.");
+                throw new ArgumentException($"Error parsing note: {note} in measure {currentMeasure}.");
             }
 
         }

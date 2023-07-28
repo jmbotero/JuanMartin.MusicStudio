@@ -129,7 +129,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             }
         }
         [Test]
-        public static void ShouldParseNoteConfigueation()
+        public static void ShouldParseNoteConfiguration()
         {
             var score = new MusicScore("Note1", "G7/4| A -2B C. D# E3 Fh Ri |");
 
@@ -139,7 +139,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             string expectedName = "A";
             int expectedLedgerCount = 0;
             bool expectedIsDotted = false;
-            AccidentalType expectedAccidental = AccidentalType.none;
+            AccidentalType expectedAccidental = AccidentalType.natural;
             int expectedOctave = 5;
             PitchType expectedType = PitchType.quarter;
             bool expectedIsRest = false;
@@ -196,14 +196,14 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
         }
 
         [Test]
-        public static void ShouldParseMeasureConfigueation()
+        public static void ShouldParseMeasureConfiguration()
         {
             DynamicsType expectedDynamics = DynamicsType.mezzo_piano;
             VolumeLoudness expectedVolume = VolumeLoudness.decrescendo;
             int expectedVoice = 0;
             string expectedInstrument = "violin";
 
-            var score = new MusicScore("Measure1", "G4/4||mp2V0[violin]|A B C D ||f1V1[flute]| G B A D ||V2[piano]| D. C A |");
+            var score = new MusicScore("Measure1", "G4/4||{mpVOL2V0[violin]}|A B C D ||{fVOL1V1[flute]}| G B A D ||{V2[piano]}| D. C A |");
 
             Measure measure = (Measure)score.Measures.First();
 
@@ -239,14 +239,14 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             Assert.AreEqual(expectedInstrument, measure.Instrument, $"Third  measure Instrument {measure.Instrument} is not correct.");
         }
         [Test]
-        public static void ShouldParseScoreConfigueation()
+        public static void ShouldParseScoreConfiguration()
         {
-            string expectedClef = "G";
+            CllefType expectedClef = CllefType.treble;
             string expectedTimeSignature = "4/4";
             int expectedTempo = 100;
             int expectedMeasureCount = 2;
 
-            var score = new MusicScore("Score1", "GT1004/4||f2[flute]| C D. E G ||p1[violin]| A B C D |");
+            var score = new MusicScore("Score1", "GT1004/4||{f2[flute]}| C D. E G ||{p1[violin]}| A B C D |");
 
             Assert.AreEqual(expectedClef, score.Clef, $"Score Clef {score.Clef} is not correct.");
             Assert.AreEqual(expectedTimeSignature, score.TimeSignature, $"Score TimeSignature {score.TimeSignature} is not correct.");
@@ -623,6 +623,31 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
                     }
                 }
             }
-         }
+        }
+
+        [Test]
+        public static void ShouldCompleteMeasureDelimiters()
+        {
+            string[] expectedMeasures = new string[] { "| A A A |", "| B B |" };
+            string actualScore = "A A A | B B";
+            string[] actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);
+
+            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String .Join(" , ", actualMeasures)}");
+
+            actualScore = "A A A | B B |";
+            actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);
+
+            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String.Join(" , ", actualMeasures)}");
+
+            actualScore = "| A A A | B B";
+            actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);
+
+            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String.Join(" , ", actualMeasures)}");
+
+            actualScore = "| A A A | B B |";
+            actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);
+
+            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String.Join(" , ", actualMeasures)}");
+        }
     }
 }

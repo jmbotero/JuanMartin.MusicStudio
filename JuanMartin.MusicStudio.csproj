@@ -64,6 +64,7 @@
     <Compile Include="Models\MusicNote.cs" />
     <Compile Include="Models\MusicScore.cs" />
     <Compile Include="MusicPlayer.cs" />
+    <Compile Include="MusicUtilities.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
