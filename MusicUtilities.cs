@@ -41,7 +41,7 @@ namespace JuanMartin.MusicStudio
                     string aux = measure.Trim();
 
                     // deal with end measures
-                    if (aux.Last() != Measure.MeasureDelimiter)
+                    if (aux.Length > 0 && aux.Last() != Measure.MeasureDelimiter)
                     {
                         aux = $"{aux} {Measure.MeasureDelimiter}";
                         measures[i] = aux;

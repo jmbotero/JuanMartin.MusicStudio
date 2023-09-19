@@ -1,0 +1,3 @@
+GT[Grave]3/4|
+|{mpV0[piano]}| ([D4 E4 A] | Ah [C A] | Ch B | Ah E4 | Dh4) (D4 | Ah z[C A] | Ch [B A] | Eh [E F] | Eh) ([C D E] ||{mf}| Eh [C A] | Ch B | Ah F4 | Eh4) (E4 ||{mp}| A [C A] | Ch B | A.h ||{p}| Ah) |
+|{mfKFV1[piano]}| Rh | [E A4] C4 A4 | [E A4] C4 A4 | [E A4] C4 A4 | [C E] C A4 | [B D] F D | [B Db] F B | [F A4] C4 A4 | [C E] G C ||{mf}| [F A6] C6 A6 | [E A6] C6 A6 | [D F] A6 F | [C F] A6 C ||{mp}|   [B D] F D | [C E] G | [F A6] C6 A6 ||{p}| Fh |

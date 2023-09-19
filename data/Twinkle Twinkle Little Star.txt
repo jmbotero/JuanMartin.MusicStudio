@@ -1,0 +1,3 @@
+GT[Allegro]4/4|
+|{mfV0[piano]}| Gq6 Gq6 Rh | Rw | Rh Bq6 Bq6 | Aq6 Aq6 Gq6 | Rw | Bq6 Bq6 Ah6 | Rw | Bq6 Bq6 Ah6 | Gq6 Gq6 Rh | Rw | Rh Bq6 Bq6 | Aq6 Aq6 Gq6 |
+|{mfKFV1[piano]}| Rh Dq Dq | Eq Eq Dh | Cq Cq Rh | Rw | Dq Dq Cq Cq | Rw | Dq Dq Cq Cq | Rw | Rh Dq Dq | Eq Eq Dh | Cq Cq Rh | Rw |

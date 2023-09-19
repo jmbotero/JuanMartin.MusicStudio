@@ -18,10 +18,10 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
 
             var measure = score.Measures.First();
 
-            foreach(var note in measure.Notes.Cast<Note>())
+            foreach (var note in measure.Notes.Cast<Note>())
             {
-                if ("C D E".Contains(note.Name)) 
-                    Assert.AreEqual(CurveType.slur, note.TypeOfCurve,$"{note.Name} is in a {note.TypeOfCurve}");
+                if ("C D E".Contains(note.Name))
+                    Assert.AreEqual(CurveType.slur, note.TypeOfCurve, $"{note.Name} is in a {note.TypeOfCurve}");
 
                 if (note.Name == "G")
                     Assert.AreEqual(CurveType.none, note.TypeOfCurve, "G is in no curve.");
@@ -39,21 +39,48 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
                 Assert.IsTrue(note.IsDotted, $"{note.Name} in measure is dotted.");
             }
         }
-
         [Test]
-        public static void ShouldCreateOneMeasureTies()
+        public static void ShouldAdjustOctaveOnLedger()
         {
-            var score = new MusicScore(" Tie1", "G4/4| C (A A) G |");
+            var score = new MusicScore("Ledger", "G2/4| A -2B |");
 
             var measure = score.Measures.First();
 
+            string i = "First";
+            var note = (Note)measure.Notes[0];
+            int expectedLedger = 0;
+            int expectedOctave = Note.NoteDefaultOctaveSetting;
+
+            Assert.AreEqual(expectedOctave, note.Octave, $"{i} note does not match Octave.");
+            Assert.AreEqual(expectedLedger, note.LedgerCount, $"{i} note does not match Ledger.");
+
+            i = "Second";
+            note = (Note)measure.Notes[1];
+            expectedLedger = -2;
+            expectedOctave = Note.NoteDefaultOctaveSetting -2;
+
+            Assert.AreEqual(expectedOctave, note.Octave, $"{i} note does not match Octave.");
+            Assert.AreEqual(expectedLedger, note.LedgerCount, $"{i} note does not match Ledger.");
+        }
+        [Test]
+        public static void ShouldCreateOneMeasureCurves()
+        {
+            var score = new MusicScore(" Curve1", "G4/4| C (A B) G (D D) |");
+
+            var measure = score.Measures.First();
+
+            Assert.AreEqual(2,  measure.CurveSets.Count,"Meaure contains more than two curves.");
+
             foreach (var note in measure.Notes.Cast<Note>())
             {
-                if (note.Name == "A")
-                    Assert.AreEqual(CurveType.tie, note.TypeOfCurve, $"{note.Name} is in a {note.TypeOfCurve}");
+                if (note.Name == "D")
+                    Assert.AreEqual(CurveType.tie, note.TypeOfCurve, $"{note.Name} is in a tie.");
+    
+                if ("A B".Contains(note.Name))
+                    Assert.AreEqual(CurveType.slur, note.TypeOfCurve, $"{note.Name} is in a slur.");
 
                 if ("C G".Contains(note.Name))
-                    Assert.AreEqual(CurveType.none, note.TypeOfCurve, "G is in no curve.");
+                    Assert.AreEqual(CurveType.none, note.TypeOfCurve, $"{note.Name} is in no curve.");
             }
         }
         [Test]
@@ -94,14 +121,14 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
 
             foreach (var note in measure.Notes)
             {
-                if (note is Note) 
+                if (note is Note)
                 {
                     Assert.IsTrue(" B C D ".Contains(((Note)note).Name), "Measure has single notes  B, C and D.");
                 }
                 else if (note is Beam)
                 {
                     Assert.IsTrue(((Beam)note).Notes.All(item => item.Name == "A"), "Beam contains only A's.");
-                 }
+                }
             }
         }
         [Test]
@@ -203,8 +230,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             int expectedVoice = 0;
             string expectedInstrument = "violin";
 
-            var score = new MusicScore("Measure1", "G4/4||{mpVOL2V0[violin]}|A B C D ||{fVOL1V1[flute]}| G B A D ||{V2[piano]}| D. C A |");
-
+            var score = new MusicScore("Measure1", "G4/4||{mpVOL2V0[violin]}|A B C D ||{fVOL1V1[flute]}| G B A D ||{V2[piano]}| D. C A | E C B D |");
             Measure measure = (Measure)score.Measures.First();
 
             Assert.AreEqual(expectedDynamics, measure.Dynamics, $"Measure Dynamics {measure.Dynamics} is not correct.");
@@ -238,20 +264,59 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             Assert.AreEqual(expectedVoice, measure.Voice, $"Third  measure Voice {measure.Voice} is not correct.");
             Assert.AreEqual(expectedInstrument, measure.Instrument, $"Third  measure Instrument {measure.Instrument} is not correct.");
         }
+
         [Test]
         public static void ShouldParseScoreConfiguration()
         {
-            CllefType expectedClef = CllefType.treble;
+            ClefType expectedClef = ClefType.treble;
             string expectedTimeSignature = "4/4";
             int expectedTempo = 100;
             int expectedMeasureCount = 2;
 
             var score = new MusicScore("Score1", "GT1004/4||{f2[flute]}| C D. E G ||{p1[violin]}| A B C D |");
 
-            Assert.AreEqual(expectedClef, score.Clef, $"Score Clef {score.Clef} is not correct.");
+            Assert.IsTrue(score.Clefs.Count > 0, "Score does not have clef.");
+            Assert.AreEqual(expectedClef, score.Clefs[0], $"Score Clef {score.Clefs[0]} is not correct.");
             Assert.AreEqual(expectedTimeSignature, score.TimeSignature, $"Score TimeSignature {score.TimeSignature} is not correct.");
-            Assert.AreEqual(expectedTempo, score.Tempo, $"Score Tempo {score.Tempo} is not correct.");
+            Assert.AreEqual(expectedTempo, score.TempoValue, $"Score TempoValue {score.TempoValue} is not correct.");
             Assert.AreEqual(expectedMeasureCount, score.Measures.Count, $"Score measure count {score.Measures.Count} is not correct.");
+        }
+
+        [Test]
+        public static void ShouldParseScoreConfigurationWithTwoClefs()
+        {
+            ClefType expectedClef = ClefType.treble;
+            ClefType expectedSecondClef = ClefType.bass;
+            int expectedClefCount = 2;
+            string expectedTimeSignature = "4/4";
+            int expectedMeasureCount = 2;
+            DynamicsType expectedDynamics = DynamicsType.mezzo_piano;
+            int expectedVoice = 1;
+            string expectedInstrument = "violin";
+
+            var score = new MusicScore("Score3", "G4/4||{fV0[flute]}| C D. E G ||{mpKFV1[violin]}| A B C D |");
+            // second  measure
+            Measure measure = score.Measures[1];
+            ClefType actualClefType = score.Clefs[measure.ClefIndex];
+
+            Assert.AreEqual(expectedClefCount, score.Clefs.Count, "Clef count for Score is not correct.");
+            Assert.AreEqual(expectedClef, score.Clefs[0], $"Score Clef {score.Clefs[0]} is not correct.");
+            Assert.AreEqual(expectedTimeSignature, score.TimeSignature, $"Score TimeSignature {score.TimeSignature} is not correct.");
+            Assert.AreEqual(expectedMeasureCount, score.Measures.Count, $"Score measure count {score.Measures.Count} is not correct.");
+            Assert.AreEqual(expectedDynamics, measure.Dynamics, $"Second  measure Dynamics {measure.Dynamics} is not correct.");
+            Assert.AreEqual(expectedSecondClef, actualClefType, $"Second  measure Clef {actualClefType} is not correct.");
+            Assert.AreEqual(expectedVoice, measure.Voice, $"Second  measure Voice {measure.Voice} is not correct.");
+            Assert.AreEqual(expectedInstrument, measure.Instrument, $"Second  measure Instrument {measure.Instrument} is not correct.");
+        }
+
+        [Test]
+        public static void ShouldParseScoreConfigurationWithAllegroTempo()
+        {
+            int expectedTempo = (int)TempoType.lento;
+
+            var score = new MusicScore("Score2", "GT[Lento]4/4||{f2[flute]}| C D. E G |");
+
+            Assert.AreEqual(expectedTempo, score.TempoValue, $"Score TempoValue {score.TempoValue} is not correct.");
         }
 
         [Test]
@@ -261,9 +326,9 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             Chord chord = (Chord)score.Measures.First().Notes[0];
             string expectedRootName = "C";
 
-            Assert.IsTrue(chord is Chord);
-            Assert.AreEqual(QualityType.major_seventh, chord.Quality, "quality is  mayor 7th");
-            Assert.AreEqual(expectedRootName, chord.Root.Name, "it is a C chord");
+            Assert.IsTrue(chord is Chord, "Object is not a chord");
+            Assert.AreEqual(QualityType.major_seventh, chord.Quality, "Chord's quality is  not mayor 7th");
+            Assert.AreEqual(expectedRootName, chord.Root.Name, "and it is not a C chord");
         }
 
         [Test]
@@ -273,9 +338,9 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             Chord chord = (Chord)score.Measures.First().Notes[0];
             string expectedRootName = "C";
 
-            Assert.IsTrue(chord is Chord);
-            Assert.AreEqual(QualityType.fixed_notes, chord.Quality, "quality is manual chord");
-            Assert.AreEqual(expectedRootName, chord.Root.Name, "it is a C chord");
+            Assert.IsTrue(chord is Chord, "Object is not a chord");
+            Assert.AreEqual(QualityType.fixed_notes, chord.Quality, "Chord's quality is not manual chord");
+            Assert.AreEqual(expectedRootName, chord.Root.Name, "and it is a C chord");
         }
 
         [Test]
@@ -587,7 +652,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
                             switch (actualChordRootName)
                             {
                                 case "A":
-                                    expectedNotes = new string[] { "A", "D","E" };
+                                    expectedNotes = new string[] { "A", "D", "E" };
                                     break;
                                 case "B":
                                     expectedNotes = new string[] { "B", "E", "F#" };
@@ -632,7 +697,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             string actualScore = "A A A | B B";
             string[] actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);
 
-            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String .Join(" , ", actualMeasures)}");
+            Assert.AreEqual(expectedMeasures, actualMeasures, $"Score {actualScore} closing and opening measure delimiters not added correctly: {String.Join(" , ", actualMeasures)}");
 
             actualScore = "A A A | B B |";
             actualMeasures = MusicUtilities.FixStaffDelimiters(actualScore);

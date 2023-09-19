@@ -21,8 +21,9 @@ namespace JuanMartin.MusicStudio.Models
         private const string MusicalNotationAttributeLedger = "ledger";
         private const string MusicalNotationAttributeBeamOpen = "beam_open";
         private const string MusicalNotationAttributeCurveOpen = "curve_open";
-        private string notePattern = $@"(?<{MusicalNotationAttributeCurveOpen}>\(?)(?<{MusicalNotationAttributeBeamOpen}>\[?)(?<{MusicalNotationAttributeLedger}>((\+|-)\d)?)(?<{MusicalNotationAttributeSymbol}>(A|B|C|D|E|F|G|R))(?<{MusicalNotationAttributeDot}>\.?)(?<{MusicalNotationAttributeAccidental}>(b|bb|#|##)?)(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeDuration}>(w|h|q|i|s|t|x|o)?)(?<{MusicalNotationAttributeBeamClose}>\]?)(?<{MusicalNotationAttributeCurveClose}>\)?)";
+        private string notePattern = $@"(?<{MusicalNotationAttributeCurveOpen}>\(?)(?<{MusicalNotationAttributeBeamOpen}>\[?)(?<{MusicalNotationAttributeLedger}>((\+|-)\d)?)(?<{MusicalNotationAttributeSymbol}>(A|B|C|D|E|F|G|R||match\d*\.?\d*))(?<{MusicalNotationAttributeDot}>\.?)(?<{MusicalNotationAttributeAccidental}>(b|bb|#|##)?)(?<{MusicalNotationAttributeOctave}>\d?)(?<{MusicalNotationAttributeDuration}>(w|h|q|i|s|t|x|o)?)(?<{MusicalNotationAttributeBeamClose}>\]?)(?<{MusicalNotationAttributeCurveClose}>\)?)";
         //http://regexstorm.net/tester?p=%28%3f%3ccurve_open%3e%5c%28%3f%29%28%3f%3cbeam_open%3e%5c%5b%3f%29%28%3f%3cledger%3e%28%28%5c%2b%7c-%29%5cd%29%3f%29%28%3f%3csymbol%3e%28A%7cB%7cC%7cD%7cE%7cF%7cG%7cR%29%29%28%3f%3cdot%3e%5c.%3f%29%28%3f%3caccidental%3e%28b%7cbb%7c%23%7c%23%23%29%3f%29%28%3f%3coctave%3e%5cd%3f%29%28%3f%3cduration%3e%28w%7ch%7cq%7ci%7cs%7ct%7cx%7co%29%3f%29%28%3f%3cbeam_close%3e%5c%5d%3f%29%28%3f%3ccurve_close%3e%5c%29%3f%29&i=%28%5b%2b2A.%233q%5d%29
+        //https://regex101.com/r/0CUY7y/3
 
         private readonly Regex _regex = null; 
         private readonly bool _isValid = true;
@@ -34,26 +35,30 @@ namespace JuanMartin.MusicStudio.Models
             List<string> groups = new List<string> { MusicalNotationAttributeCurveOpen, MusicalNotationAttributeBeamOpen,MusicalNotationAttributeLedger, MusicalNotationAttributeAccidental, MusicalNotationAttributeDuration, MusicalNotationAttributeSymbol, MusicalNotationAttributeDot , MusicalNotationAttributeOctave , MusicalNotationAttributeBeamClose,MusicalNotationAttributeCurveClose};
 
             Measure = currentMeasure;
-       
+            ClefType currentClef = (Measure != null) ? Measure.Score.Clefs[Measure.ClefIndex] : ClefType.none;
+
             _regex = new Regex(notePattern, RegexOptions.Compiled);
 
-            
-            if (_regex.IsMatch(note)) {
+
+            if (_regex.IsMatch(note))
+            {
                 var matches = _regex.Matches(note);
                 bool hasNoteBeenAdded = false;
 
-                foreach (Match m in matches)
+                foreach (Match match in matches)
                 {
+                    if (match.ToString().Length <= 0) // only process matches with values
+                        continue;
+
                     foreach (var name in groups)
                     {
-                        var group = m.Groups[name];
+                        var group = match.Groups[name];
 
                         var value = group.Success ? group.Value : string.Empty;
                         Console.WriteLine($"{name}:{value}");
                         switch (name)
                         {
                             case MusicalNotationAttributeCurveOpen:
-                                IsDotted = (value != string.Empty);
                                 if (value != string.Empty)
                                 {
                                     _startCurve = true;
@@ -70,7 +75,7 @@ namespace JuanMartin.MusicStudio.Models
                                 }
                                 break;
                             case MusicalNotationAttributeLedger:
-                                base.LedgerCount = (value == string.Empty) ? 0 : int.Parse(value);
+                                LedgerCount = (value == string.Empty) ? 0 : int.Parse(value);
                                 break;
                             case MusicalNotationAttributeAccidental:
                                 Accidental = AccidentalType.natural;
@@ -80,7 +85,8 @@ namespace JuanMartin.MusicStudio.Models
                                 }
                                 break;
                             case MusicalNotationAttributeDot:
-                                if (value != string.Empty && !hasNoteBeenAdded  && !InBeam && addNewNoteToCurrentMeasure)
+                                IsDotted = (value != string.Empty);
+                                if (value != string.Empty && !hasNoteBeenAdded && !InBeam && addNewNoteToCurrentMeasure)
                                 {
                                     AddNote(InBeam || (activeBeam || _startBeam == true), this, currentMeasure);
                                     hasNoteBeenAdded = true;
@@ -97,23 +103,37 @@ namespace JuanMartin.MusicStudio.Models
                                 {
                                     Octave = int.Parse(value);
                                 }
-                                else if (Measure != null && Measure.Score != null && Measure.Score.Clef == CllefType.treble)
+                                else if (Measure != null && Measure.Score != null && currentClef == ClefType.treble)
                                     Octave = 5;
-                                else if (Measure != null && Measure.Score != null && Measure.Score.Clef == CllefType.bass)
+                                else if (Measure != null && Measure.Score != null && currentClef == ClefType.bass)
                                     Octave = 4;
+
+
                                 break;
                             case MusicalNotationAttributeSymbol:
                                 if (value == string.Empty)
                                 {
                                     _isValid = false;
+                                    break;
                                 }
                                 else
                                 {
-                                    Name = value;
-                                    if (value == "R")
-                                    { 
-                                        IsRest = true;
+                                    if (value.IndexOfAny(new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'R' }) != -1)
+                                    {
+                                        Name = value;
+                                        IsRest = (value == "R") ? true : false;
                                     }
+                                    else if (value[0] == 'm')
+                                    {
+                                        Name = value;
+                                        IsMicrotone = true;
+                                    }
+                                    else
+                                    {
+                                        _isValid = false;
+                                        break;
+                                    }
+
 
                                     if (addNewNoteToCurrentMeasure && (activeBeam || _startBeam == true))
                                     {
@@ -125,7 +145,7 @@ namespace JuanMartin.MusicStudio.Models
 
                                     if (addNewNoteToCurrentMeasure && (activeCurve || _startCurve == true))
                                     {
-                                        currentMeasure.GetCurve().Add(this);
+                                        CurveIndex = currentMeasure.GetCurve().AddNote(this);
                                         InCurve = true;
                                     }
 
@@ -135,9 +155,13 @@ namespace JuanMartin.MusicStudio.Models
                                         hasNoteBeenAdded = true;
                                     }
                                 }
+
+                                Curve curve = null;
+                                if (currentMeasure != null) curve = currentMeasure.GetCurve();
+                                TypeOfCurve = (InCurve && curve != null) ? curve.GetCurveType() : CurveType.none;
                                 break;
                             case MusicalNotationAttributeBeamClose:
-                                if (value != string.Empty &&  activeBeam )
+                                if (value != string.Empty && activeBeam)
                                 {
                                     Beam beam = currentMeasure.GetBeam();
                                     currentMeasure.Notes.Add(beam);
@@ -149,23 +173,18 @@ namespace JuanMartin.MusicStudio.Models
                             case MusicalNotationAttributeCurveClose:
                                 if (value != string.Empty)
                                 {
-                                    _startCurve  = false;
+                                    _startCurve = false;
                                     LastInCurve = true;
-                                }
-                                List<Note> curve = null;
-                                if(currentMeasure!=null) curve = currentMeasure.GetCurve();
-
-                                if(curve!=null && curve.Count > 1) 
-                                { 
-                                    SetCurveType(curve);
-                                }
-                                else
-                                {
-                                    TypeOfCurve = CurveType.none;
                                 }
                                 break;
                         }
                     }
+                }
+                if (LedgerCount != 0) Octave += LedgerCount;
+
+                if (currentMeasure != null && TypeOfCurve != CurveType.none)
+                {
+                    SetCurveTypeForAllNotes(currentMeasure.GetCurve(), TypeOfCurve);
                 }
             }
             else
@@ -175,18 +194,14 @@ namespace JuanMartin.MusicStudio.Models
 
         }
 
-        /// <summary>
-        /// Set curve types of all notes, there must be more than 1,
-        ///  in cuve to tie or slur.
-        /// </summary>
-        /// <param name="curve"></param>
-        private void SetCurveType(List<Note> curve)
+        private void SetCurveTypeForAllNotes(Curve curve, CurveType typeOfCurve)
         {
-            CurveType curveType = (curve.Any(note => note.Name != curve.First().Name)) ? CurveType.slur : CurveType.tie;
-        
-            foreach (var note in curve.Cast<MusicNote>())
+            if (curve != null)
             {
-                note.TypeOfCurve = curveType;
+                foreach (var note in curve.Notes)
+                {
+                    note.TypeOfCurve = typeOfCurve;
+                }
             }
         }
 
@@ -195,10 +210,7 @@ namespace JuanMartin.MusicStudio.Models
             if (addToBeam)
             {
                 Beam beam = currentMeasure.GetBeam();
-                if (beam != null)
-                {
-                    beam.Notes.Add(note);
-                }
+                beam?.Notes.Add(note);
             }
             else
             {
@@ -228,12 +240,11 @@ namespace JuanMartin.MusicStudio.Models
         public  bool IsValid { get { return _isValid; } }
 
 
-        public void Play(Player player)
+        public void Play(Player player, Dictionary<string, string> additionalSettings = null)
         {
-            string staccato = SetStaccato();
+            string staccato = SetStaccato(additionalSettings);
+            Console.Write(this.ToString());
             player.Play(staccato);
-
-            Console.Write($" {this}");
         }
     }
 }

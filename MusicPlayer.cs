@@ -15,11 +15,14 @@ namespace JuanMartin.MusicStudio
             _player = new NFugue.Playing.Player();
         }
 
-        public void PlayScore(string name, string sheet)
+        public void PlayScore(string name, string sheet, bool selectSingleNoteMode = false)
         {
             var score = new Models.MusicScore(name,sheet);
 
-            score.Play(_player);
+            if(!selectSingleNoteMode ) 
+                score.Play(_player);
+            else
+                score.PlaySingleNotes(_player);
         }
         public void  PlayScale(string letterScale)
         {

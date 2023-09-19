@@ -17,7 +17,7 @@ namespace JuanMartin.MusicStudio.Models
         private const string MusicalNotationAttributeClef = "clef";
         private const string MusicalNotationAttributeTempo = "tempo";
         private const string MusicalNotationAttributeTimesignature = "timesignature";
-        private const string MusicalNotationAttributeMeasures = "measures";
+        private const string MusicalNotationAttributeMeasures = "measureStrings";
         //^(G|F|C)                                      clef
         //(1|2|3|4/4)?                               time signature
         //\|                                                chanel open
@@ -33,10 +33,10 @@ namespace JuanMartin.MusicStudio.Models
         //\}?                                            tie close
 
         //        private string scorePattern = @"^(G|F|C)((1|2|3|4/4)?\|)\{?(+|-\d)?((b|bb|#|x)?\[?(\staffs(A|B|C|D|E|F|G|Q|H|W(\.)?\|)*\]?\}?
-        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>G|C|F)(?<{MusicalNotationAttributeTempo}>(T\d+)?)(?<{MusicalNotationAttributeTimesignature}>(\d/\d)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
+        private readonly string scorePattern = $@"(?<{MusicalNotationAttributeClef}>{ScoreClefValuesSetting})(?<{MusicalNotationAttributeTempo}>(T(\[\w+\]|\d+))?)(?<{MusicalNotationAttributeTimesignature}>(\d/\d)?)(?<{MusicalNotationAttributeMeasures}>\|.+\|)";
 
-        //http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctempo%3e%28T%5cd%2b%29%3f%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cmeasures%3e%5c%7c.%2b%5c%7c%29&i=GT1004%2f4%7c%7cf2%5bflute%5d%7c+C+D.+E+G+%7c%7cp1%5bviolin%5d%7c+A+B+C+D+%7cv
-
+        //http://regexstorm.net/tester?p=%28%3f%3cclef%3eG%7cC%7cF%29%28%3f%3ctempo%3e%28T%5cd%2b%29%3f%29%28%3f%3ctimeframe%3e%28%281%7c2%7c3%7c4%29%2f4%29%3f%29%28%3f%3cmeasures%3e%5c%7c.%2b%5c%7c%29&i=GT1004%2f4%7c%7c%7bfVOL2V0%5bflute%5d%7d%7c+C+D.+E+G+%7c%7c%7bmpV1%5bviolin%5d%7d%7c+A+B+C+D+%7c
+        //https://regex101.com/r/Sja1rT/1
 
         /// <summary>
         /// Music theory   https://www.musicnotes.com/blog/how-to-read-sheet-music/
@@ -60,6 +60,9 @@ namespace JuanMartin.MusicStudio.Models
 
                 foreach (Match match in matches)
                 {
+                    if (match.ToString().Length <= 0) // only process matches with values
+                        continue;
+
                     foreach (var group_name in groups)
                     {
                         var group = match.Groups[group_name];
@@ -71,14 +74,27 @@ namespace JuanMartin.MusicStudio.Models
                             case MusicalNotationAttributeClef:
                                 if (value != string.Empty)
                                 {
-                                    Clef = EnumExtensions.GetValueFromDescription<CllefType>(value);
+                                    AddClef(value);
                                 }
                                 break;
                             case MusicalNotationAttributeTempo:
                                 if (value != string.Empty)
                                 {
                                     value = value.TrimStart('T');
-                                    Tempo = int.Parse(value);
+                                    if (value.Contains("[") && value.Contains("]"))
+                                    {
+                                        if (EnumExtensions.GetDescriptionsEnumerable(typeof(TempoType)).Contains(value))
+                                        {
+                                            TempoValue = (int)EnumExtensions.GetValueFromDescription<TempoType>(value);
+                                        }
+                                        else
+                                            TempoValue = ScoreDefaultTempoValueSetting;
+                                    }
+                                    else
+                                    {
+                                        TempoValue = int.Parse(value);
+                                        Console.WriteLine($"Assigned tempo {GetTempoName(TempoValue)} from {value}.");
+                                    }
                                 }
                                 break;
                             case MusicalNotationAttributeTimesignature:
@@ -87,7 +103,7 @@ namespace JuanMartin.MusicStudio.Models
                             case MusicalNotationAttributeMeasures:
                                 if (value != string.Empty)
                                 {
-                                    List<Note> extendedCurve = null;
+                                    Curve extendedCurve = null;
                                     Note extendedNote = null;
                                     string[] chanels = new[] { "" };
                                     bool hasHeaders = false;
@@ -125,12 +141,12 @@ namespace JuanMartin.MusicStudio.Models
                                                     header = $"{Measure.MeasureHeaderStart}{headers[index]}{Measure.MeasureHeaderEnd}";
                                                     value = value.Replace(header, "");
                                                     // going forward header start and end delimiters are not recquired
-                                                    // for the proper parsing of measures
+                                                    // for the proper parsing of measureStrings
                                                     header = headers[index];
                                                 }
                                                 // fix truncation of note staffs delimiters
-                                                var measures = MusicUtilities.FixStaffDelimiters(value);
-                                                foreach (var m in measures)
+                                                var measureStrings = MusicUtilities.FixStaffDelimiters(value);
+                                                foreach (var m in measureStrings)
                                                 {
                                                     string aux = (hasHeaders) ? $"{header}{m}" : m;
                                                     var measure = new MusicMeasure(aux, this, out extendedNote, extendedCurve);
@@ -139,12 +155,10 @@ namespace JuanMartin.MusicStudio.Models
                                                         extendedCurve = null;
                                                         if (extendedNote != null)
                                                         {
-                                                            extendedCurve = new List<Note>
-                                                            {
-                                                                extendedNote
-                                                            };
+                                                            extendedCurve = (measure != null) ? new Curve(extendedNote) : null;
                                                         }
                                                         Measures.Add(measure);
+                                                        measure.Index = Measures.Count - 1;
                                                     }
                                                 }
                                             }
@@ -166,15 +180,57 @@ namespace JuanMartin.MusicStudio.Models
             }
         }
  
-        public void Play(Player player)
+        public new void PlaySingleNotes(Player player)
         {
-            Dictionary<string, string> additionalSettings = null;
+            int previousMeasureVoice = -1;
+            Dictionary<string, string> additionalSettings = new Dictionary<string, string>();
 
-            Console.WriteLine($"Playing {Name}: ");
-             string staccato = SetStaccato(additionalSettings);
-            player.Play(staccato);
+            Console.WriteLine(StringScoreHeader(true));
+            player.Play(StringScoreHeader());
 
-            Console.Write($" {this}");
+            foreach(var measure in Measures)
+            {
+                if (measure.Dynamics != DynamicsType.neutral) { additionalSettings.Add(Measure.MeasureDynamicsSetting, ""); }
+                if (measure.Voice != previousMeasureVoice)
+                {
+                    Console.Write($"{Measure.MeasureDelimiter} {measure.StringMeasureHeader(true)}");
+                    //player.Play(measure.StringMeasureHeader());
+                    additionalSettings = measure.PrcessNoteSettings(additionalSettings);
+                }
+
+                Console.Write($"{Measure.MeasureDelimiter} ");
+                foreach (var note in measure.Notes)
+                {
+                    if (note is Note)
+                        ((MusicNote)note).Play(player, additionalSettings);
+                    else if (note is Beam)
+                        ((MusicBeam)note).Play(player, additionalSettings);
+                    else if (note is Chord)
+                        ((MusicChord)note).Play(player, additionalSettings);
+                    Console.Write(" ");
+                }
+                Console.Write($"{Measure.MeasureDelimiter} ");
+                previousMeasureVoice = measure.Voice;
+
+                additionalSettings.Remove(Measure.MeasureDynamicsSetting);
+            }
+        }
+        public void Play(Player player, bool PlayNotesOnly = false)
+        {
+            using (var p = player)
+            {
+
+                if (PlayNotesOnly)
+                {
+                    PlaySingleNotes(p);
+                }
+                else
+                {
+                    Console.WriteLine(this.ToString());
+                    string staccato = SetStaccato();
+                    p.Play(staccato);
+                }
+            }
         }
 }
 }

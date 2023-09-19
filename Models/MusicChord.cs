@@ -255,18 +255,11 @@ namespace JuanMartin.MusicStudio.Models
         }
 
 
-        public void Play(Player player)
+        public void Play(Player player, Dictionary<string, string> additionalSettings = null)
         {
-            string staccato = SetStaccato();
-
+            string staccato = SetStaccato(additionalSettings);
+            Console.WriteLine(this.ToString());
             player.Play(staccato);
-
-            Console.Write($" {this}");
-        }
-
-        public override string ToString()
-        {
-                return $"{Root}-{EnumExtensions.GetDescription(Quality)}";
         }
 
         public static ChordType IsValidChord(string chord)
