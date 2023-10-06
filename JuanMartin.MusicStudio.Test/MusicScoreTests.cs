@@ -1,22 +1,23 @@
-﻿using JuanMartin.Kernel.Extesions;
-using JuanMartin.Models.Music;
 using JuanMartin.MusicStudio.Models;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using JuanMartin.Models.Music;
+using JuanMartin.Kernel.Extesions;
 
-namespace JuanMartin.MusicStudio.Net48.Test.Models
+namespace JuanMartin.MusicStudio.Test
 {
-    [TestFixture]
     public class MusicScoreTests
     {
+        [SetUp]
+        public void Setup()
+        {
+        }
+
         [Test]
         public static void ShouldCreateOneMeasureSlurs()
         {
             var score = new MusicScore("Slur1", "G4/4| (C D E) G |");
 
-            var measure = score.Measures.First();
+            var measure = score.
+                Measures.First();
 
             foreach (var note in measure.Notes.Cast<Note>())
             {
@@ -57,7 +58,7 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
             i = "Second";
             note = (Note)measure.Notes[1];
             expectedLedger = -2;
-            expectedOctave = Note.NoteDefaultOctaveSetting -2;
+            expectedOctave = Note.NoteDefaultOctaveSetting - 2;
 
             Assert.AreEqual(expectedOctave, note.Octave, $"{i} note does not match Octave.");
             Assert.AreEqual(expectedLedger, note.LedgerCount, $"{i} note does not match Ledger.");
@@ -69,13 +70,13 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
 
             var measure = score.Measures.First();
 
-            Assert.AreEqual(2,  measure.CurveSets.Count,"Meaure contains more than two curves.");
+            Assert.AreEqual(2, measure.CurveSets.Count, "Meaure contains more than two curves.");
 
             foreach (var note in measure.Notes.Cast<Note>())
             {
                 if (note.Name == "D")
                     Assert.AreEqual(CurveType.tie, note.TypeOfCurve, $"{note.Name} is in a tie.");
-    
+
                 if ("A B".Contains(note.Name))
                     Assert.AreEqual(CurveType.slur, note.TypeOfCurve, $"{note.Name} is in a slur.");
 
@@ -353,8 +354,8 @@ namespace JuanMartin.MusicStudio.Net48.Test.Models
                 foreach (QualityType quality in Enum.GetValues(typeof(QualityType)))
                 {
                     string description = EnumExtensions.GetDescription(quality);
-                    MusicChord chord = new MusicChord(ChordType.quality_based, $"{actualChordRootName}{actualChordRootOctave}{description}", null);
-                    string[] expectedNotes = null;
+                    MusicChord chord = new(ChordType.quality_based, $"{actualChordRootName}{actualChordRootOctave}{description}", null);
+                    string[]? expectedNotes = null;
 
                     switch (quality)
                     {

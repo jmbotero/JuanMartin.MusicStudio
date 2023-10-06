@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using JuanMartin.Kernel.Extesions;
 using JuanMartin.Models.Music;
-using JuanMartin.Kernel.Extesions;
 using NFugue.Playing;
-using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace JuanMartin.MusicStudio.Models
 {

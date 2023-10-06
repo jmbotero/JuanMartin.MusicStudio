@@ -1,11 +1,7 @@
 ﻿using JuanMartin.Models.Music;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using NFugue.Playing;
 using JuanMartin.Kernel.Extesions;
-using JuanMartin.Kernel;
 
 namespace JuanMartin.MusicStudio.Models
 {

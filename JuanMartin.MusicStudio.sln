@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.5.33103.201
+VisualStudioVersion = 17.8.34112.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.MusicStudio", "JuanMartin.MusicStudio.csproj", "{42C904A9-BD0B-467E-A299-81C6793096A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JuanMartin.MusicStudio", "JuanMartin.MusicStudio\JuanMartin.MusicStudio.csproj", "{F06A2CD9-DEF2-4A08-9A01-EB5F9CA7D8BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JuanMartin.MusicStudio.Test", "JuanMartin.MusicStudio.Test\JuanMartin.MusicStudio.Test.csproj", "{4A783A15-5E1B-403A-ABF8-650BD799A7DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Models", "..\JuanMartin.Models\JuanMartin.Models\JuanMartin.Models.csproj", "{6B59DE41-40F5-41C0-98CD-3393D463C757}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.Kernel", "..\JuanMartin.Kernel\JuanMartin.Kernel\JuanMartin.Kernel.csproj", "{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JuanMartin.MusicStudio.Net48.Test", "JuanMartin.MusicStudio.Net48.Test\JuanMartin.MusicStudio.Net48.Test.csproj", "{A4170619-8A94-4D9B-BECF-33AB13C49034}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{42C904A9-BD0B-467E-A299-81C6793096A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42C904A9-BD0B-467E-A299-81C6793096A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42C904A9-BD0B-467E-A299-81C6793096A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42C904A9-BD0B-467E-A299-81C6793096A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F06A2CD9-DEF2-4A08-9A01-EB5F9CA7D8BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F06A2CD9-DEF2-4A08-9A01-EB5F9CA7D8BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F06A2CD9-DEF2-4A08-9A01-EB5F9CA7D8BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F06A2CD9-DEF2-4A08-9A01-EB5F9CA7D8BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A783A15-5E1B-403A-ABF8-650BD799A7DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A783A15-5E1B-403A-ABF8-650BD799A7DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A783A15-5E1B-403A-ABF8-650BD799A7DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A783A15-5E1B-403A-ABF8-650BD799A7DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B59DE41-40F5-41C0-98CD-3393D463C757}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -29,15 +33,11 @@ Global
 		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4515E3A1-F6B3-4AF5-AE75-BB9E214EC349}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4170619-8A94-4D9B-BECF-33AB13C49034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4170619-8A94-4D9B-BECF-33AB13C49034}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4170619-8A94-4D9B-BECF-33AB13C49034}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4170619-8A94-4D9B-BECF-33AB13C49034}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8EF0ABAD-1455-4D37-B802-66C1A29D679D}
+		SolutionGuid = {DC2DD401-B4C1-4AC4-883D-813C871BA8AF}
 	EndGlobalSection
 EndGlobal
