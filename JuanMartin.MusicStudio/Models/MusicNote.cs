@@ -114,9 +114,10 @@ namespace JuanMartin.MusicStudio.Models
                                 }
                                 else
                                 {
-                                    if (value.IndexOfAny(new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'R' }) != -1)
+                                    if (value.IndexOfAny(noteNames) != -1)
                                     {
-                                        Name = value;
+                                        Index = Array.IndexOf(noteNames, value);
+                                        Name = noteNames[Index].ToString();
                                         IsRest = (value == "R") ? true : false;
                                     }
                                     else if (value[0] == 'm')
