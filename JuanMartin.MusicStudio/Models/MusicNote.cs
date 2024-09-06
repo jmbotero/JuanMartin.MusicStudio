@@ -116,7 +116,7 @@ namespace JuanMartin.MusicStudio.Models
                                 {
                                     if (value.IndexOfAny(noteNames) != -1)
                                     {
-                                        Index = Array.IndexOf(noteNames, value);
+                                        Index = Array.IndexOf(noteNames, Convert.ToChar(value));
                                         Name = noteNames[Index].ToString();
                                         IsRest = (value == "R") ? true : false;
                                     }
